@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-amazon text-amazon-text bg-amazon-bg;
+  }
+}
+
+@layer components {
+  .amazon-button {
+    @apply bg-amazon-btn hover:bg-yellow-400 text-amazon-text px-4 py-2 rounded-lg transition-all duration-200 shadow-sm font-medium;
+  }
+  
+  .amazon-button-buy {
+    @apply bg-amazon-buy hover:bg-orange-500 text-amazon-text px-4 py-2 rounded-lg transition-all duration-200 shadow-sm font-medium;
+  }
+  
+  .amazon-link {
+    @apply text-amazon-link hover:text-orange-700 hover:underline cursor-pointer;
+  }
+
+  .nav-link {
+    @apply text-white hover:border border-transparent hover:border-white p-2 flex flex-col justify-center leading-tight;
+  }
+}
