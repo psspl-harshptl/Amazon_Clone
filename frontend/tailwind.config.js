@@ -20,7 +20,7 @@ export default {
         }
       },
       fontFamily: {
-        amazon: ['"Amazon Ember"', 'Arial', 'sans-serif'],
+        amazon: ['"Amazon Ember"', '"Amazon Ember Medium"', '"Amazon Ember Bold"', '"Segoe UI"', '"Helvetica Neue"', 'Arial', 'sans-serif'],
       }
     }
   },

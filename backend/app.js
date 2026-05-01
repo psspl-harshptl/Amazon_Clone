@@ -7,7 +7,11 @@ const errorMiddleware = require("./middlewares/error.middleware");
 const app = express();
 
 // Middlewares
-app.use(cors({ origin: process.env.CORS_ORIGIN || "http://localhost:3000" }));
+console.log("CORS_ORIGIN from env:", process.env.CORS_ORIGIN);
+app.use(cors({ 
+  origin: [process.env.CORS_ORIGIN, "http://localhost:5173", "http://localhost:3000"].filter(Boolean),
+  credentials: true
+}));
 app.use(express.json());
 app.use(morgan("dev"));
 

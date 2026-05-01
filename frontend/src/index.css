@@ -1,3 +1,7 @@
+@import url('https://db.onlinewebfonts.com/c/3108eb4da4655a215801f0f4ed03ab1b?family=Amazon+Ember');
+@import url('https://db.onlinewebfonts.com/c/02fcddff61b677f4989d2933d574ca89?family=Amazon+Ember+Bold');
+@import url('https://db.onlinewebfonts.com/c/ae1211657d7c48bc3bcdfe36634e1532?family=Amazon+Ember+Medium');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
