@@ -5,18 +5,23 @@ import { useAuth } from '../../context/AuthContext';
 
 /* ── REFINED Cart icon ── */
 const CartIcon = ({ count }) => (
-  <div className="relative flex items-end cursor-pointer group px-2 py-1 border border-transparent hover:border-white transition-all">
-    <div className="relative">
-      <span className="absolute -top-1 left-1/2 -translate-x-1/2 text-[#FF9900] text-[16px] font-bold leading-none z-10">
+  <div className="relative flex items-center cursor-pointer group px-2 py-1 border border-transparent hover:border-white transition-all h-[50px]">
+    <div className="relative flex items-end">
+      {/* Sprite Cart Icon */}
+      <div 
+        className="w-[38px] h-[26px]"
+        style={{
+          backgroundImage: 'url("/nav-sprite.png")',
+          backgroundPosition: '-10px -340px',
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: '350px 450px',
+        }}
+      />
+      <span className="absolute top-[-2px] left-[17px] text-[#f08804] text-[16px] font-bold leading-none z-10">
         {count}
       </span>
-      <svg width="38" height="26" viewBox="0 0 38 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="mt-1">
-        <path d="M5 6h4.5l3.5 14h18l3-10H12.5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-        <circle cx="15" cy="26" r="2.5" fill="white" />
-        <circle cx="28" cy="26" r="2.5" fill="white" />
-      </svg>
+      <span className="text-[14px] font-bold self-end pb-1 ml-0.5">Cart</span>
     </div>
-    <span className="text-[14px] font-bold self-end pb-1 ml-0.5">Cart</span>
   </div>
 );
 
@@ -47,9 +52,18 @@ export default function Navbar() {
       <nav className="bg-[#131921] text-white flex items-center h-[60px] px-2 gap-1 relative">
         {/* Logo */}
         <Link to="/" className="flex-shrink-0">
-          <div className="border border-transparent hover:border-white px-1.5 py-1 flex items-end gap-0.5">
-            <img src="https://pngimg.com/uploads/amazon/amazon_PNG11.png" alt="Amazon" className="w-[80px] object-contain" />
-            <span className="text-[#FF9900] text-[11px] font-bold mb-0.5">.in</span>
+          <div className="border border-transparent hover:border-white px-1.5 py-1 flex items-center h-[50px]">
+            {/* Sprite Logo */}
+            <div 
+              className="w-[97px] h-[30px]"
+              style={{
+                backgroundImage: 'url("/nav-sprite.png")',
+                backgroundPosition: '-10px -51px',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: '350px 450px',
+              }}
+            />
+            <span className="text-[#ccc] text-[11px] font-normal -mt-[4px]">.in</span>
           </div>
         </Link>
 
@@ -57,7 +71,15 @@ export default function Navbar() {
         <div className="border border-transparent hover:border-white hidden lg:flex flex-col px-2 py-1 cursor-pointer leading-tight">
           <span className="text-[11px] text-[#ccc]">Delivering to</span>
           <span className="text-[13px] font-bold flex items-center gap-0.5">
-            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+            <div 
+              className="w-[15px] h-[18px]"
+              style={{
+                backgroundImage: 'url("/nav-sprite.png")',
+                backgroundPosition: '-71px -378px',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: '350px 450px',
+              }}
+            />
             Update location
           </span>
         </div>
@@ -74,7 +96,15 @@ export default function Navbar() {
             </div>
             <input type="text" placeholder="Search AmazonClone.in" className="flex-grow px-3 text-[#0F1111] text-[14px] outline-none" />
             <button className="bg-[#FF9900] hover:bg-[#e68a00] w-[46px] flex items-center justify-center transition-colors">
-              <svg className="w-5 h-5 text-[#131921]" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+              <div 
+                className="w-[21px] h-[21px]"
+                style={{
+                  backgroundImage: 'url("/nav-sprite.png")',
+                  backgroundPosition: '-10px -290px',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: '350px 450px',
+                }}
+              />
             </button>
           </div>
         </div>
@@ -145,7 +175,15 @@ export default function Navbar() {
       {/* ══ SECONDARY NAV ══ */}
       <div className="bg-[#232F3E] text-white flex items-center h-[38px] px-2 overflow-x-auto whitespace-nowrap text-[13px] no-scrollbar">
         <div className="border border-transparent hover:border-white flex items-center gap-1 px-2 py-1 cursor-pointer font-bold">
-          <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+          <div 
+            className="w-[17px] h-[14px]"
+            style={{
+              backgroundImage: 'url("/nav-sprite.png")',
+              backgroundPosition: '-172px -255px',
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: '350px 450px',
+            }}
+          />
           <span>All</span>
         </div>
         {NAV_ITEMS.map(({ label }) => (

@@ -25,7 +25,8 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.JSONB,
       allowNull: false
     },
-    paymentMethod: DataTypes.STRING
+    paymentMethod: DataTypes.STRING,
+    paymentId: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'Order',

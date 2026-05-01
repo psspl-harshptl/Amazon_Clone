@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 
 const HERO_IMAGES = [
   { src: '/images/hero/hero1.jpg', alt: 'Shop the latest deals' },
@@ -50,19 +51,20 @@ const CategoryCard = ({ title, linkText = 'See more', link = '/products', childr
 );
 
 const QuadGrid = ({ items }) => (
-  <div className="grid grid-cols-2 gap-3">
+  <div className="grid grid-cols-2 gap-x-3 gap-y-5">
     {items.map(({ label, image, link }, i) => (
       <Link key={i} to={link || '/products'} className="cursor-pointer group block">
-        <div className="h-[120px] bg-white flex items-center justify-center overflow-hidden mb-1">
-          <img src={image} alt={label} className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform" />
+        <div className="h-[120px] overflow-hidden mb-1">
+          <img src={image} alt={label} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
         </div>
-        <p className="text-[12px] text-[#0F1111] leading-tight group-hover:text-[#C7511F]">{label}</p>
+        <p className="text-[12px] text-[#0F1111] leading-tight font-medium group-hover:text-[#C7511F]">{label}</p>
       </Link>
     ))}
   </div>
 );
 
 export default function Home() {
+  const { user } = useAuth();
   const [bestSellers, setBestSellers] = useState([]);
   const [topDeals, setTopDeals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -116,31 +118,45 @@ export default function Home() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           <CategoryCard title="Gaming accessories" link="/products?categoryId=1">
             <QuadGrid items={[
-              { label: 'Headsets', image: '/images/categories/headset.jpg', link: '/products?categoryId=1&search=headset' },
-              { label: 'Keyboards', image: '/images/categories/keyboard.jpg', link: '/products?categoryId=1&search=keyboard' },
-              { label: 'Mice', image: '/images/categories/mouse.jpg', link: '/products?categoryId=1&search=mouse' },
-              { label: 'Chairs', image: '/images/categories/chair.jpg', link: '/products?categoryId=1&search=chair' },
+              { label: 'Headsets', image: '/images/categories/headset.png', link: '/products?categoryId=1&search=headset' },
+              { label: 'Keyboards', image: '/images/categories/keyboard.png', link: '/products?categoryId=1&search=keyboard' },
+              { label: 'Mice', image: '/images/categories/mouse.png', link: '/products?categoryId=1&search=mouse' },
+              { label: 'Chairs', image: '/images/categories/chair.png', link: '/products?categoryId=1&search=chair' },
             ]} />
           </CategoryCard>
 
           <CategoryCard title="Shop deals in Fashion" link="/products?categoryId=2">
             <QuadGrid items={[
-              { label: 'Jeans under ₹600', image: '/images/categories/jeans.jpg', link: '/products?categoryId=2&maxPrice=600' },
-              { label: 'Tops under ₹500', image: '/images/categories/tops.jpg', link: '/products?categoryId=2&maxPrice=500' },
-              { label: 'Dresses under ₹800', image: '/images/categories/dress.jpg', link: '/products?categoryId=2&maxPrice=800' },
-              { label: 'Footwear under ₹700', image: '/images/categories/footwear.jpg', link: '/products?categoryId=2&maxPrice=700' },
+              { label: 'Jeans under ₹600', image: '/images/categories/jeans.png', link: '/products?categoryId=2&maxPrice=600' },
+              { label: 'Tops under ₹500', image: '/images/categories/tops.png', link: '/products?categoryId=2&maxPrice=500' },
+              { label: 'Dresses under ₹800', image: '/images/categories/dress.png', link: '/products?categoryId=2&maxPrice=800' },
+              { label: 'Footwear under ₹700', image: '/images/categories/footwear.png', link: '/products?categoryId=2&maxPrice=700' },
             ]} />
           </CategoryCard>
 
           <CategoryCard title="Deals on Gadgets" link="/products?categoryId=1&is_top_deal=true">
-            <div className="h-64 flex items-center justify-center bg-white"><img src="/images/categories/smarthome.jpg" className="max-h-full object-contain" alt="Gadgets" /></div>
+            <div className="h-64 overflow-hidden">
+              <img src="/images/categories/smarthome.jpg" className="w-full h-full object-cover" alt="Gadgets" />
+            </div>
           </CategoryCard>
 
           <div className="flex flex-col gap-5">
-            <div className="bg-white p-5 shadow-sm">
-              <h3 className="text-[21px] font-bold text-[#0F1111] mb-3 leading-tight">Sign in for your best experience</h3>
-              <Link to="/login"><button className="amazon-button w-full py-1.5 text-sm font-normal shadow-sm">Sign in securely</button></Link>
-            </div>
+            {!user ? (
+              <div className="bg-white p-5 shadow-sm">
+                <h3 className="text-[21px] font-bold text-[#0F1111] mb-3 leading-tight">Sign in for your best experience</h3>
+                <Link to="/login"><button className="amazon-button w-full py-1.5 text-sm font-normal shadow-sm">Sign in securely</button></Link>
+              </div>
+            ) : (
+              <div className="bg-white p-5 shadow-sm">
+                <h3 className="text-[21px] font-bold text-[#0F1111] mb-1 leading-tight">
+                  Welcome back, {user.name?.split(' ')[0]}!
+                </h3>
+                <p className="text-[13px] text-[#565959] mb-3">Pick up where you left off</p>
+                <Link to="/orders">
+                  <button className="amazon-button w-full py-1.5 text-sm font-normal shadow-sm">View your orders</button>
+                </Link>
+              </div>
+            )}
             <div className="bg-white shadow-sm flex-grow relative overflow-hidden flex items-center justify-center">
                <img src="/images/categories/laptop-ad.jpg" className="w-full h-full object-cover" alt="Ad" />
             </div>
@@ -157,13 +173,13 @@ export default function Home() {
           <SliderArrow direction="left" onClick={() => scroll(bestRef, 'left')} />
           <div ref={bestRef} className="flex overflow-x-auto gap-6 pb-4 scroll-smooth no-scrollbar">
             {bestSellers.map((p, i) => (
-              <Link key={p.id} to={`/products/${p.id}`} className="min-w-[180px] w-[180px] flex flex-col group/card">
-                <div className="h-[180px] bg-[#F7F8F8] flex items-center justify-center p-4 mb-2">
+              <Link key={p.id} to={`/products/${p.id}`} className="min-w-[180px] w-[180px] flex flex-col group/card bg-white">
+                <div className="h-[180px] bg-white flex items-center justify-center overflow-hidden mb-2">
                   <img 
                     src={p.imageUrl} 
-                    onError={(e) => { e.target.src = 'https://m.media-amazon.com/images/I/01RmK+J4pJL._AC_UY218_.jpg'; }}
+                    onError={(e) => { e.target.src = '/images/products/placeholder.png'; }}
                     alt={p.name} 
-                    className="max-h-full object-contain group-hover/card:scale-105 transition-transform" 
+                    className="w-full h-full object-contain group-hover/card:scale-105 transition-transform" 
                   />
                 </div>
                 {i === 0 && <span className="text-[12px] font-bold text-[#C7511F] mb-1">#1 Best Seller</span>}
@@ -185,13 +201,13 @@ export default function Home() {
           <SliderArrow direction="left" onClick={() => scroll(dealsRef, 'left')} />
           <div ref={dealsRef} className="flex overflow-x-auto gap-6 pb-4 scroll-smooth no-scrollbar">
             {topDeals.map((p) => (
-              <Link key={p.id} to={`/products/${p.id}`} className="min-w-[200px] w-[200px] flex flex-col group/card">
-                <div className="h-[200px] bg-[#F7F8F8] flex items-center justify-center p-6 mb-3">
+              <Link key={p.id} to={`/products/${p.id}`} className="min-w-[200px] w-[200px] flex flex-col group/card bg-white">
+                <div className="h-[200px] bg-white flex items-center justify-center overflow-hidden mb-3">
                   <img 
                     src={p.imageUrl} 
-                    onError={(e) => { e.target.src = 'https://m.media-amazon.com/images/I/01RmK+J4pJL._AC_UY218_.jpg'; }}
+                    onError={(e) => { e.target.src = '/images/products/placeholder.png'; }}
                     alt={p.name} 
-                    className="max-h-full object-contain group-hover/card:scale-105 transition-transform" 
+                    className="w-full h-full object-contain group-hover/card:scale-105 transition-transform" 
                   />
                 </div>
                 <div className="flex items-center gap-2 mb-1">
@@ -215,8 +231,8 @@ export default function Home() {
             { title: 'Gifts for the family', link: '/products?categoryId=1', img: 'gifts' }
           ].map((item, i) => (
             <CategoryCard key={i} title={item.title} link={item.link}>
-              <div className="h-64 flex items-center justify-center bg-white overflow-hidden">
-                <img src={`/images/categories/${item.img}.jpg`} className="max-h-full object-contain hover:scale-105 transition-transform" alt={item.title} />
+              <div className="h-64 overflow-hidden">
+                <img src={`/images/categories/${item.img}.jpg`} className="w-full h-full object-cover hover:scale-105 transition-transform" alt={item.title} />
               </div>
             </CategoryCard>
           ))}

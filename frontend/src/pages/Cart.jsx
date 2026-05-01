@@ -173,10 +173,10 @@ const Cart = () => {
          <h2 className="text-xl font-bold mb-4 bg-white p-4 shadow-sm rounded-t">Your items and recommendations</h2>
          <div className="bg-white p-6 shadow-sm rounded-b grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
             {[
-              {name: 'RuggedX Outdoor Speaker', price: 45.99, img: 'https://m.media-amazon.com/images/I/71N28H-hD-L._AC_UY218_.jpg'},
-              {name: 'TurboCharge 6ft Braided Cable', price: 12.99, img: 'https://m.media-amazon.com/images/I/61N9p7X65OL._AC_UY218_.jpg'},
-              {name: 'WoolFelt Minimalist Desk Mat', price: 24.00, img: 'https://m.media-amazon.com/images/I/61O2-WkG8sL._AC_UY218_.jpg'},
-              {name: 'Heritage Leather Journal', price: 18.50, img: 'https://m.media-amazon.com/images/I/81fP-J-0fGL._AC_UY218_.jpg'},
+              {name: 'RuggedX Outdoor Speaker', price: 45.99, img: '/images/products/speaker.png'},
+              {name: 'TurboCharge 6ft Braided Cable', price: 12.99, img: '/images/products/braided-cable.png'},
+              {name: 'WoolFelt Minimalist Desk Mat', price: 24.00, img: '/images/products/deskmat.png'},
+              {name: 'Heritage Leather Journal', price: 18.50, img: '/images/products/journal.png'},
             ].map((p, i) => (
               <div key={i} className="space-y-2 group cursor-pointer">
                  <div className="aspect-square bg-gray-50 flex items-center justify-center p-4">

@@ -37,7 +37,7 @@ const ProductDetail = () => {
         if (res.data.success && res.data.data) {
           const p = res.data.data;
           setProduct(p);
-          const mainImg = p.galleryImages?.find(img => img.isMain)?.url || p.imageUrl || 'https://m.media-amazon.com/images/I/01RmK+J4pJL._AC_UY218_.jpg';
+          const mainImg = p.galleryImages?.find(img => img.isMain)?.url || p.imageUrl || '/images/products/placeholder.png';
           setActiveImg(mainImg);
         } else {
           setError('Product not found');
@@ -88,20 +88,27 @@ const ProductDetail = () => {
       <main className="max-w-[1500px] mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-8 py-6">
         {/* Left: Gallery */}
         <div className="lg:col-span-5 flex flex-col md:flex-row gap-4">
-          <div className="flex md:flex-col gap-2 order-2 md:order-1 overflow-x-auto no-scrollbar">
+          {/* Thumbnails */}
+          <div className="flex md:flex-col gap-2 order-2 md:order-1 overflow-x-auto no-scrollbar max-h-[500px]">
             {(product.galleryImages?.length > 0 ? product.galleryImages : [{url: product.imageUrl}]).map((img, i) => (
               <div 
                 key={i} 
                 onMouseEnter={() => setActiveImg(img.url)}
-                className={`w-12 h-12 border-2 rounded p-1 cursor-pointer flex-shrink-0 transition-all
-                  ${activeImg === img.url ? 'border-[#E77600] ring-1 ring-[#E77600]' : 'border-gray-200 hover:border-[#E77600]'}`}
+                className={`w-12 h-12 border rounded p-0.5 cursor-pointer flex-shrink-0 bg-white flex items-center justify-center transition-all
+                  ${activeImg === img.url ? 'border-[#E77600] ring-1 ring-[#E77600]' : 'border-gray-200 hover:border-[#E77600] shadow-sm'}`}
               >
-                <img src={img.url} alt="thumb" className="w-full h-full object-contain" />
+                <img 
+                  src={img.url} 
+                  onError={(e) => { e.target.src = '/images/products/placeholder.png'; }}
+                  alt="thumb" 
+                  className="max-w-full max-h-full object-contain" 
+                />
               </div>
             ))}
           </div>
-          <div className="flex-grow order-1 md:order-2 bg-white flex items-center justify-center p-4 min-h-[400px]">
-             <img src={activeImg} alt={product.name} className="max-h-[500px] max-w-full object-contain" />
+          {/* Main Image */}
+          <div className="flex-grow order-1 md:order-2 bg-white flex items-center justify-center p-4 min-h-[400px] border border-gray-50 rounded-lg">
+             <img src={activeImg} alt={product.name} className="max-h-[500px] max-w-full object-contain hover:scale-[1.02] transition-transform duration-300" />
           </div>
         </div>
 
@@ -115,16 +122,18 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          <div className="space-y-1">
-            <div className="flex items-baseline gap-2">
-              <span className="text-[#CC0C39] text-3xl font-light">-{product.discount_percent}%</span>
-              <div className="flex items-start">
-                <span className="text-sm pt-1">₹</span>
-                <span className="text-3xl font-medium">{Number(product.price).toLocaleString('en-IN')}</span>
+          <div className="space-y-1 py-4 border-t border-gray-100">
+            <div className="flex items-center gap-2">
+              <span className="text-[#CC0C39] text-[28px] font-light">-{product.discount_percent}%</span>
+              <div className="flex items-start text-[#0F1111]">
+                <span className="text-sm pt-2 font-medium">₹</span>
+                <span className="text-[28px] font-medium leading-none">{Number(product.price).toLocaleString('en-IN')}</span>
               </div>
             </div>
-            <p className="text-[14px] text-[#565959]">M.R.P.: <span className="line-through">₹{Number(product.mrp || product.price * 1.2).toLocaleString('en-IN')}</span></p>
-            <p className="text-[14px] text-[#0F1111] mt-2">Inclusive of all taxes</p>
+            <div className="flex flex-col text-[14px]">
+              <p className="text-[#565959]">M.R.P.: <span className="line-through">₹{Number(product.mrp || Math.round(product.price / (1 - product.discount_percent / 100))).toLocaleString('en-IN')}</span></p>
+              <p className="text-[#0F1111] font-medium mt-1">Inclusive of all taxes</p>
+            </div>
           </div>
 
           <div className="border-t border-gray-100 pt-6">

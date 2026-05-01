@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -14,14 +15,23 @@ import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
 import CartDrawer from './components/cart/CartDrawer';
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
 function AppContent() {
   const location = useLocation();
-  const isAuthPage = ['/login', '/register'].includes(location.pathname);
+  const isMinimalPage = ['/login', '/register', '/checkout'].includes(location.pathname);
 
   return (
     <div className="flex flex-col min-h-screen relative">
-      {!isAuthPage && <Navbar />}
-      {!isAuthPage && <CartDrawer />}
+      <ScrollToTop />
+      {!isMinimalPage && <Navbar />}
+      {!isMinimalPage && <CartDrawer />}
       <main className="flex-grow">
         <Routes>
           <Route path="/"              element={<Home />} />
@@ -37,7 +47,7 @@ function AppContent() {
           <Route path="/profile"       element={<Profile />} />
         </Routes>
       </main>
-      {!isAuthPage && <Footer />}
+      {!isMinimalPage && <Footer />}
     </div>
   );
 }

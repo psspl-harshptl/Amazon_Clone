@@ -3,7 +3,7 @@ import { useCart } from '../../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 
 const CartDrawer = () => {
-  const { cart, cartSubtotal, isDrawerOpen, toggleDrawer, updateQuantity } = useCart();
+  const { cart, cartCount, cartSubtotal, isDrawerOpen, toggleDrawer, updateQuantity } = useCart();
   const navigate = useNavigate();
 
   return (
@@ -35,6 +35,13 @@ const CartDrawer = () => {
                 <span>Your order is eligible for FREE Delivery. <span className="text-[#007185] cursor-pointer hover:underline">Details</span></span>
              </div>
              
+             <button 
+                onClick={() => { navigate('/checkout'); toggleDrawer(false); }}
+                className="w-full py-2 bg-[#FFD814] border border-[#FCD200] rounded-full text-[13px] font-medium shadow-sm hover:bg-[#F7CA00] transition-colors mb-2"
+             >
+                Proceed to Buy ({cartCount} {cartCount === 1 ? 'item' : 'items'})
+             </button>
+
              <button 
                 onClick={() => { navigate('/cart'); toggleDrawer(false); }}
                 className="w-full py-2 bg-white border border-gray-300 rounded-full text-[13px] font-medium shadow-sm hover:bg-gray-50 transition-colors"

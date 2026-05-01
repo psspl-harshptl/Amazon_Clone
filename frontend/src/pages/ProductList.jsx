@@ -210,12 +210,12 @@ const ProductList = () => {
             <div className="space-y-4">
               {products.map((p) => (
                 <div key={p.id} className="flex gap-6 border border-gray-100 rounded-lg overflow-hidden group hover:shadow-md transition-shadow p-2">
-                  <Link to={`/products/${p.id}`} className="w-[220px] h-[220px] bg-[#F7F8F8] flex-shrink-0 flex items-center justify-center p-4">
+                  <Link to={`/products/${p.id}`} className="w-[220px] h-[220px] flex-shrink-0 overflow-hidden">
                     <img
                       src={p.imageUrl}
-                      onError={(e) => { e.target.src = 'https://m.media-amazon.com/images/I/01RmK+J4pJL._AC_UY218_.jpg'; }}
+                      onError={(e) => { e.target.src = '/images/products/placeholder.png'; }}
                       alt={p.name}
-                      className="max-h-full max-w-full object-contain mix-blend-multiply transition-transform group-hover:scale-105"
+                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
                     />
                   </Link>
                   <div className="flex-grow pt-2 pr-4">
