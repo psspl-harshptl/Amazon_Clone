@@ -29,7 +29,7 @@ class UserController {
         if (!isMatch) {
           return res.status(401).json({ success: false, message: 'Incorrect current password' });
         }
-        user.password = await bcrypt.hash(newPassword, 10);
+        user.password = await bcrypt.hash(newPassword, 12);
       }
 
       // Update other fields

@@ -215,7 +215,7 @@ const ProductList = () => {
                       src={p.imageUrl}
                       onError={(e) => { e.target.src = '/images/products/placeholder.png'; }}
                       alt={p.name}
-                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      className="w-full h-full object-contain transition-transform group-hover:scale-105"
                     />
                   </Link>
                   <div className="flex-grow pt-2 pr-4">

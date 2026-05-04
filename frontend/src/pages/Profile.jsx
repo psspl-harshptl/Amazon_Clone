@@ -44,7 +44,8 @@ const Profile = () => {
     setMessage({ type: '', text: '' });
 
     try {
-      const res = await api.put('/users/profile', formData);
+      const { confirmPassword: _ignored, ...payload } = formData;
+      const res = await api.put('/users/profile', payload);
       if (res.data.success) {
         login(res.data.data); // Update global user state
         setMessage({ type: 'success', text: 'Profile updated successfully!' });

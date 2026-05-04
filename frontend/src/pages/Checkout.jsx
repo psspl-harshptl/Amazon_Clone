@@ -306,8 +306,10 @@ const Checkout = () => {
                         </div>
                         <div className="w-full md:w-64 bg-gray-50/50 p-4 rounded-lg border border-gray-100">
                            <p className="text-[13px] font-bold mb-2">Delivery date:</p>
-                           <p className="text-[13px] text-green-700 font-bold">Tomorrow, May 2</p>
-                           <p className="text-[11px] text-gray-500 mt-1">if you order within 8 hrs and 15 mins</p>
+                           <p className="text-[13px] text-green-700 font-bold">
+                             {new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
+                           </p>
+                           <p className="text-[11px] text-gray-500 mt-1">Estimated delivery in 5 days</p>
                         </div>
                      </div>
                   </div>

@@ -7,8 +7,7 @@ const errorMiddleware = require("./middlewares/error.middleware");
 const app = express();
 
 // Middlewares
-console.log("CORS_ORIGIN from env:", process.env.CORS_ORIGIN);
-app.use(cors({ 
+app.use(cors({
   origin: [process.env.CORS_ORIGIN, "http://localhost:5173", "http://localhost:3000"].filter(Boolean),
   credentials: true
 }));

@@ -90,7 +90,7 @@ const OrderSuccess = () => {
                     <h3 className="font-bold text-gray-500 uppercase tracking-wider mb-2">Estimated Delivery</h3>
                     <div className="flex items-center gap-2 text-green-700 font-bold">
                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                       <p>Wednesday, 07 May 2026</p>
+                       <p>{new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
                     </div>
                   </div>
                 </div>
@@ -178,7 +178,9 @@ const OrderSuccess = () => {
 
               <div className="mt-8 bg-gray-50 p-4 rounded-lg text-center border border-gray-100">
                 <p className="text-xs text-gray-500 uppercase tracking-tight font-bold mb-1">Arriving by</p>
-                <p className="text-lg font-bold text-gray-900">May 07, 2026</p>
+                <p className="text-lg font-bold text-gray-900">
+                  {new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </p>
               </div>
             </div>
 

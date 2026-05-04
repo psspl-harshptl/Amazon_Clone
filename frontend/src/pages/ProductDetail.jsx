@@ -57,7 +57,7 @@ const ProductDetail = () => {
 
   const handleBuyNow = () => {
     addToCart(product, quantity);
-    navigate('/cart');
+    navigate('/checkout');
   };
 
   if (loading) return (

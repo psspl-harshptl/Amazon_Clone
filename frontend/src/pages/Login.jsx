@@ -22,12 +22,8 @@ const Login = () => {
       const res = await api.post('/auth/login', { email, password });
       
       if (res.data.success) {
-        // Handle backend response (token is usually in res.data.token)
-        const { user, token } = res.data.data || res.data;
-        
-        // Save token for axios interceptors
+        const { user, token } = res.data;
         localStorage.setItem('amazon_token', token);
-        
         login(user);
         navigate('/');
       }
@@ -63,7 +59,7 @@ const Login = () => {
             />
           </div>
           <div>
-            <label className="block text-[13px] font-bold mb-1 text-[#0F1111] flex justify-between">
+            <label className="flex justify-between text-[13px] font-bold mb-1 text-[#0F1111]">
               Password
               <span className="text-[#0066c0] font-normal hover:underline cursor-pointer">Forgot Password?</span>
             </label>

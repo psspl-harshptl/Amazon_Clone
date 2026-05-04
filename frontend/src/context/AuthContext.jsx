@@ -35,7 +35,8 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('amazon_user');
-    window.location.href = '/'; // Redirect to home on logout
+    localStorage.removeItem('amazon_token');
+    window.location.href = '/';
   };
 
   return (

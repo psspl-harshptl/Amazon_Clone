@@ -1,36 +1,38 @@
-const { Order, OrderItem, Product } = require('../models');
+const { Order, OrderItem, Product, sequelize } = require('../models');
 
 class OrderController {
   async createOrder(req, res) {
+    const t = await sequelize.transaction();
     try {
       const { items, totalAmount, shippingAddress, paymentMethod, paymentId } = req.body;
       const userId = req.user.id;
 
-      // Create main order
       const order = await Order.create({
         userId,
         totalAmount,
         shippingAddress,
         paymentMethod,
         paymentId,
-        status: 'confirmed' // Since payment is already done in frontend simulation/real modal
-      });
+        status: 'confirmed'
+      }, { transaction: t });
 
-      // Create order items
-      const orderItems = await Promise.all(items.map(async (item) => {
-        return await OrderItem.create({
+      await Promise.all(items.map(item =>
+        OrderItem.create({
           orderId: order.id,
           productId: item.productId,
           quantity: item.quantity,
           priceAtPurchase: item.price
-        });
-      }));
+        }, { transaction: t })
+      ));
+
+      await t.commit();
 
       res.status(201).json({
         success: true,
         data: order
       });
     } catch (error) {
+      await t.rollback();
       console.error('Create Order Error:', error);
       res.status(500).json({
         success: false,

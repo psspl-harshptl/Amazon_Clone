@@ -169,7 +169,7 @@ const OrderCard = ({ order }) => {
         </div>
         <div className="text-right">
           <p className="text-[11px] uppercase tracking-wider text-gray-500 font-bold">
-            Order # {order.isDummy ? order.id : `406-${String(order.id).padStart(7, '0')}-${Math.floor(Math.random() * 9000000 + 1000000)}`}
+            Order # {order.isDummy ? order.id : `406-${String(order.id).padStart(7, '0')}-${String(order.id * 1234567 % 9999999).padStart(7, '0')}`}
           </p>
           {!order.isDummy && (
             <Link to={`/orders/${order.id}`} className="text-[#007185] hover:text-[#C7511F] hover:underline text-[13px]">
