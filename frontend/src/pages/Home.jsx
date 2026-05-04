@@ -54,8 +54,12 @@ const QuadGrid = ({ items }) => (
   <div className="grid grid-cols-2 gap-x-3 gap-y-5">
     {items.map(({ label, image, link }, i) => (
       <Link key={i} to={link || '/products'} className="cursor-pointer group block">
-        <div className="h-[120px] overflow-hidden mb-1">
-          <img src={image} alt={label} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+        <div className="h-[120px] bg-white flex items-center justify-center overflow-hidden mb-1">
+          <img 
+            src={image} 
+            alt={label} 
+            className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-300" 
+          />
         </div>
         <p className="text-[12px] text-[#0F1111] leading-tight font-medium group-hover:text-[#C7511F]">{label}</p>
       </Link>
@@ -135,8 +139,8 @@ export default function Home() {
           </CategoryCard>
 
           <CategoryCard title="Deals on Gadgets" link="/products?categoryId=1&is_top_deal=true">
-            <div className="h-64 overflow-hidden">
-              <img src="/images/categories/smarthome.jpg" className="w-full h-full object-cover" alt="Gadgets" />
+            <div className="h-[320px] bg-white flex items-center justify-center overflow-hidden">
+              <img src="/images/categories/smarthome.jpg" className="max-w-full max-h-full object-contain" alt="Gadgets" />
             </div>
           </CategoryCard>
 
@@ -224,15 +228,19 @@ export default function Home() {
 
         {/* ROW 2: Categories */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {[
+          { [
             { title: 'Home décor under ₹4,000', link: '/products?categoryId=3&maxPrice=4000', img: 'homedecor' },
             { title: 'Kitchen favorites', link: '/products?categoryId=3', img: 'kitchen' },
             { title: 'Pet supplies', link: '/products?categoryId=1', img: 'pets' },
             { title: 'Gifts for the family', link: '/products?categoryId=1', img: 'gifts' }
           ].map((item, i) => (
             <CategoryCard key={i} title={item.title} link={item.link}>
-              <div className="h-64 overflow-hidden">
-                <img src={`/images/categories/${item.img}.jpg`} className="w-full h-full object-cover hover:scale-105 transition-transform" alt={item.title} />
+              <div className="h-[320px] bg-white flex items-center justify-center overflow-hidden">
+                <img 
+                  src={`/images/categories/${item.img}.jpg`} 
+                  className="max-w-full max-h-full object-contain hover:scale-105 transition-transform" 
+                  alt={item.title} 
+                />
               </div>
             </CategoryCard>
           ))}

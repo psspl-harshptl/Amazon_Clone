@@ -89,12 +89,12 @@ const ProductDetail = () => {
         {/* Left: Gallery */}
         <div className="lg:col-span-5 flex flex-col md:flex-row gap-4">
           {/* Thumbnails */}
-          <div className="flex md:flex-col gap-2 order-2 md:order-1 overflow-x-auto no-scrollbar max-h-[500px]">
+          <div className="flex md:flex-col gap-2 order-2 md:order-1 overflow-x-auto no-scrollbar max-h-[500px] min-w-[50px]">
             {(product.galleryImages?.length > 0 ? product.galleryImages : [{url: product.imageUrl}]).map((img, i) => (
               <div
                 key={i}
                 onMouseEnter={() => setActiveImg(img.url)}
-                className={`w-12 h-12 border rounded p-0.5 cursor-pointer flex-shrink-0 bg-white flex items-center justify-center overflow-hidden transition-all
+                className={`w-12 h-12 border rounded p-1 cursor-pointer flex-shrink-0 bg-white flex items-center justify-center overflow-hidden transition-all
                   ${activeImg === img.url ? 'border-[#E77600] ring-1 ring-[#E77600]' : 'border-gray-200 hover:border-[#E77600] shadow-sm'}`}
               >
                 <img
