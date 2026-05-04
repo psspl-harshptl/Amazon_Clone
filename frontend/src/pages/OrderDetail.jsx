@@ -139,12 +139,14 @@ export default function OrderDetail() {
               <div className="space-y-5">
                 {order.items?.map((item) => (
                   <div key={item.id} className="flex gap-4 pb-5 border-b border-gray-100 last:border-0 last:pb-0">
-                    <img
-                      src={item.product?.imageUrl}
-                      alt={item.product?.name}
-                      className="w-[100px] h-[100px] object-contain border border-gray-100 rounded p-1.5 flex-shrink-0"
-                      onError={(e) => { e.target.src = '/images/products/placeholder.png'; }}
-                    />
+                    <div className="w-[100px] h-[100px] flex-shrink-0 border border-gray-100 rounded bg-white flex items-center justify-center overflow-hidden p-1.5">
+                      <img
+                        src={item.product?.imageUrl}
+                        alt={item.product?.name}
+                        className="w-full h-full object-contain"
+                        onError={(e) => { e.target.src = '/images/products/placeholder.png'; }}
+                      />
+                    </div>
                     <div className="flex-1 min-w-0">
                       <Link
                         to={`/products/${item.product?.id || item.productId}`}

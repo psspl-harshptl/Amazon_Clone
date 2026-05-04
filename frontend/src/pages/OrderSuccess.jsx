@@ -111,7 +111,14 @@ const OrderSuccess = () => {
               <div className="space-y-6">
                 {order.items.map((item) => (
                   <div key={item.id} className="flex gap-4 border-b border-gray-50 pb-6 last:border-0 last:pb-0">
-                    <img src={item.product?.imageUrl} alt={item.product?.name} className="w-24 h-24 object-contain rounded border border-gray-100 p-2" />
+                    <div className="w-24 h-24 flex-shrink-0 border border-gray-100 rounded bg-white flex items-center justify-center overflow-hidden p-2">
+                      <img
+                        src={item.product?.imageUrl}
+                        alt={item.product?.name}
+                        className="w-full h-full object-contain"
+                        onError={(e) => { e.target.src = '/images/products/placeholder.png'; }}
+                      />
+                    </div>
                     <div className="flex-1">
                       <h4 className="text-[15px] font-bold text-[#0F1111] line-clamp-2 hover:text-[#C45500] cursor-pointer">{item.product?.name}</h4>
                       <p className="text-[13px] text-gray-600 mt-1">Qty: <span className="font-bold">{item.quantity}</span></p>

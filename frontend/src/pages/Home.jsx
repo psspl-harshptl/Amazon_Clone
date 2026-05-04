@@ -174,12 +174,12 @@ export default function Home() {
           <div ref={bestRef} className="flex overflow-x-auto gap-6 pb-4 scroll-smooth no-scrollbar">
             {bestSellers.map((p, i) => (
               <Link key={p.id} to={`/products/${p.id}`} className="min-w-[180px] w-[180px] flex flex-col group/card bg-white">
-                <div className="h-[180px] bg-white flex items-center justify-center overflow-hidden mb-2">
-                  <img 
-                    src={p.imageUrl} 
+                <div className="h-[180px] bg-white flex items-center justify-center overflow-hidden mb-2 p-2">
+                  <img
+                    src={p.imageUrl}
                     onError={(e) => { e.target.src = '/images/products/placeholder.png'; }}
-                    alt={p.name} 
-                    className="w-full h-full object-contain group-hover/card:scale-105 transition-transform" 
+                    alt={p.name}
+                    className="w-full h-full object-contain group-hover/card:scale-105 transition-transform"
                   />
                 </div>
                 {i === 0 && <span className="text-[12px] font-bold text-[#C7511F] mb-1">#1 Best Seller</span>}
@@ -202,12 +202,12 @@ export default function Home() {
           <div ref={dealsRef} className="flex overflow-x-auto gap-6 pb-4 scroll-smooth no-scrollbar">
             {topDeals.map((p) => (
               <Link key={p.id} to={`/products/${p.id}`} className="min-w-[200px] w-[200px] flex flex-col group/card bg-white">
-                <div className="h-[200px] bg-white flex items-center justify-center overflow-hidden mb-3">
-                  <img 
-                    src={p.imageUrl} 
+                <div className="h-[200px] bg-white flex items-center justify-center overflow-hidden mb-3 p-2">
+                  <img
+                    src={p.imageUrl}
                     onError={(e) => { e.target.src = '/images/products/placeholder.png'; }}
-                    alt={p.name} 
-                    className="w-full h-full object-contain group-hover/card:scale-105 transition-transform" 
+                    alt={p.name}
+                    className="w-full h-full object-contain group-hover/card:scale-105 transition-transform"
                   />
                 </div>
                 <div className="flex items-center gap-2 mb-1">

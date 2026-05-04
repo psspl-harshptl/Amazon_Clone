@@ -68,21 +68,45 @@ export default function Navbar() {
         </Link>
 
         {/* Deliver to */}
-        <div className="border border-transparent hover:border-white hidden lg:flex flex-col px-2 py-1 cursor-pointer leading-tight">
-          <span className="text-[11px] text-[#ccc]">Delivering to</span>
-          <span className="text-[13px] font-bold flex items-center gap-0.5">
-            <div 
-              className="w-[15px] h-[18px]"
-              style={{
-                backgroundImage: 'url("/nav-sprite.png")',
-                backgroundPosition: '-71px -378px',
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: '350px 450px',
-              }}
-            />
-            Update location
-          </span>
-        </div>
+        {user ? (
+          <Link
+            to="/profile"
+            className="border border-transparent hover:border-white hidden lg:flex flex-col px-2 py-1 cursor-pointer leading-tight"
+          >
+            <span className="text-[11px] text-[#ccc]">Delivering to</span>
+            <span className="text-[13px] font-bold flex items-center gap-0.5">
+              <div
+                className="w-[15px] h-[18px]"
+                style={{
+                  backgroundImage: 'url("/nav-sprite.png")',
+                  backgroundPosition: '-71px -378px',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: '350px 450px',
+                }}
+              />
+              {user.city || 'Update location'}
+            </span>
+          </Link>
+        ) : (
+          <Link
+            to="/login"
+            className="border border-transparent hover:border-white hidden lg:flex flex-col px-2 py-1 cursor-pointer leading-tight"
+          >
+            <span className="text-[11px] text-[#ccc]">Delivering to</span>
+            <span className="text-[13px] font-bold flex items-center gap-0.5">
+              <div
+                className="w-[15px] h-[18px]"
+                style={{
+                  backgroundImage: 'url("/nav-sprite.png")',
+                  backgroundPosition: '-71px -378px',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: '350px 450px',
+                }}
+              />
+              Update location
+            </span>
+          </Link>
+        )}
 
         {/* Search Bar */}
         <div className="flex-grow min-w-0 mx-1">

@@ -62,8 +62,8 @@ const CartDrawer = () => {
             cart.map((item) => (
               <div key={item.id} className="flex flex-col border-b border-gray-100 pb-6 last:border-0">
                 <div className="flex gap-4 mb-4">
-                  <div className="w-[80px] h-[80px] flex-shrink-0 p-1 border border-gray-100 rounded">
-                    <img src={item.imageUrl} alt={item.name} className="w-full h-full object-contain" />
+                  <div className="w-[80px] h-[80px] flex-shrink-0 border border-gray-100 rounded bg-white flex items-center justify-center overflow-hidden p-1">
+                    <img src={item.imageUrl} alt={item.name} className="w-full h-full object-contain" onError={(e) => { e.target.src = '/images/products/placeholder.png'; }} />
                   </div>
                   <div className="flex-grow">
                     <p className="text-[14px] font-medium text-[#0F1111] line-clamp-2 mb-1">{item.name}</p>

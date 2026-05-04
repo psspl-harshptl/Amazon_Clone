@@ -204,12 +204,14 @@ const OrderCard = ({ order }) => {
         {/* Items */}
         {order.items.map((item) => (
           <div key={item.id} className="flex gap-4 mb-4 last:mb-0">
-            <img
-              src={item.product?.imageUrl}
-              alt={item.product?.name}
-              className="w-[90px] h-[90px] object-contain border border-gray-100 rounded p-1 flex-shrink-0"
-              onError={(e) => { e.target.src = '/images/products/placeholder.png'; }}
-            />
+            <div className="w-[90px] h-[90px] flex-shrink-0 border border-gray-100 rounded bg-white flex items-center justify-center overflow-hidden p-1">
+              <img
+                src={item.product?.imageUrl}
+                alt={item.product?.name}
+                className="w-full h-full object-contain"
+                onError={(e) => { e.target.src = '/images/products/placeholder.png'; }}
+              />
+            </div>
             <div className="flex-1 min-w-0">
               <Link
                 to={item.product?.id ? `/products/${item.product.id}` : '#'}

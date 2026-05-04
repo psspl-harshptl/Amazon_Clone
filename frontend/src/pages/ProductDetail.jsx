@@ -91,24 +91,24 @@ const ProductDetail = () => {
           {/* Thumbnails */}
           <div className="flex md:flex-col gap-2 order-2 md:order-1 overflow-x-auto no-scrollbar max-h-[500px]">
             {(product.galleryImages?.length > 0 ? product.galleryImages : [{url: product.imageUrl}]).map((img, i) => (
-              <div 
-                key={i} 
+              <div
+                key={i}
                 onMouseEnter={() => setActiveImg(img.url)}
-                className={`w-12 h-12 border rounded p-0.5 cursor-pointer flex-shrink-0 bg-white flex items-center justify-center transition-all
+                className={`w-12 h-12 border rounded p-0.5 cursor-pointer flex-shrink-0 bg-white flex items-center justify-center overflow-hidden transition-all
                   ${activeImg === img.url ? 'border-[#E77600] ring-1 ring-[#E77600]' : 'border-gray-200 hover:border-[#E77600] shadow-sm'}`}
               >
-                <img 
-                  src={img.url} 
+                <img
+                  src={img.url}
                   onError={(e) => { e.target.src = '/images/products/placeholder.png'; }}
-                  alt="thumb" 
-                  className="max-w-full max-h-full object-contain" 
+                  alt="thumb"
+                  className="w-full h-full object-contain"
                 />
               </div>
             ))}
           </div>
           {/* Main Image */}
-          <div className="flex-grow order-1 md:order-2 bg-white flex items-center justify-center p-4 min-h-[400px] border border-gray-50 rounded-lg">
-             <img src={activeImg} alt={product.name} className="max-h-[500px] max-w-full object-contain hover:scale-[1.02] transition-transform duration-300" />
+          <div className="flex-grow order-1 md:order-2 bg-white flex items-center justify-center overflow-hidden h-[450px] border border-gray-50 rounded-lg p-4">
+             <img src={activeImg} alt={product.name} className="w-full h-full object-contain hover:scale-[1.02] transition-transform duration-300" />
           </div>
         </div>
 
