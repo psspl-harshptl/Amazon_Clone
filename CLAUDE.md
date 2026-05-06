@@ -2,6 +2,7 @@
 
 ## Commands
 - `/pr-review` — runs PR diff review (see `.claude/commands/pr-review.md`)
+- `/spec` — expand a vague feature idea into a structured spec before coding starts
 
 ## Stack
 - **Frontend:** React 18, Tailwind CSS, Axios, React Router v6
@@ -125,3 +126,14 @@ cd frontend && npm i && npm run dev
 - No sequelize.sync() — migrations only
 - No stack traces to client
 - No seller/admin features — Buyer Module only
+
+---
+
+## Response Style
+- **Be concise** — no trailing summaries, no restating what was just done
+- **Code first** — for implementation tasks, show code before explanations
+- **No over-engineering** — implement exactly what was asked, nothing more
+- **Clarify before coding** — if a requirement is ambiguous or touches auth/orders/payments, ask one focused question first
+- **File references** — always link files as `[path](path#Lline)` so they are clickable
+- **Errors** — explain root cause in one sentence, then show the fix; skip the backstory
+- **Scope guard** — if the request would break a Hard Rule above, refuse and explain why in one line
