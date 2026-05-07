@@ -1,5 +1,8 @@
 # Dependencies
 node_modules/
+
+# Uploaded files (runtime content, not code)
+backend/public/uploads/
 .pnp
 .pnp.js
 
