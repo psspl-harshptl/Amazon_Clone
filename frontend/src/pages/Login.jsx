@@ -20,12 +20,14 @@ const Login = () => {
     try {
       // 🚀 REAL LOGIN FLOW
       const res = await api.post('/auth/login', { email, password });
-      
+
       if (res.data.success) {
         const { user, token } = res.data;
         localStorage.setItem('amazon_token', token);
         login(user);
-        navigate('/');
+        if (user.role === 'super_admin') navigate('/admin/dashboard');
+        else if (user.role === 'seller') navigate('/seller/dashboard');
+        else navigate('/');
       }
     } catch (err) {
       console.error('Login Error:', err);
@@ -92,6 +94,15 @@ const Login = () => {
         <Link to="/register" className="w-full block text-center bg-[#F0F2F2] hover:bg-[#E3E6E6] border border-gray-300 py-1.5 rounded shadow-sm text-sm font-medium transition-all">
           Create your Amazon account
         </Link>
+      </div>
+
+      <div className="mt-4 text-center">
+        <p className="text-xs text-gray-500">
+          Want to sell?{' '}
+          <Link to="/seller/register" className="text-[#0066c0] hover:underline font-medium">Apply as a Seller</Link>
+          {' · '}
+          <Link to="/seller/login" className="text-[#0066c0] hover:underline">Seller Sign In</Link>
+        </p>
       </div>
     </div>
   );

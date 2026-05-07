@@ -137,3 +137,4 @@ cd frontend && npm i && npm run dev
 - **File references** — always link files as `[path](path#Lline)` so they are clickable
 - **Errors** — explain root cause in one sentence, then show the fix; skip the backstory
 - **Scope guard** — if the request would break a Hard Rule above, refuse and explain why in one line
+

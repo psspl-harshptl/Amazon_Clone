@@ -27,7 +27,7 @@ const CartIcon = ({ count }) => (
 );
 
 const NAV_ITEMS = [
-  { label: 'Fresh' }, { label: 'MX Player' }, { label: 'Sell' }, { label: 'Bestsellers' }, { label: 'Mobiles' },
+  { label: 'Fresh' }, { label: 'MX Player' }, { label: 'Bestsellers' }, { label: 'Mobiles' },
   { label: "Today's Deals" }, { label: 'Customer Service' }, { label: 'New Releases' }, { label: 'Prime' },
   { label: 'Amazon Pay' }, { label: 'Electronics' }, { label: 'Fashion' }, { label: 'Home & Kitchen' },
   { label: 'Computers' }, { label: 'Books' }, { label: 'Toys & Games' }, { label: 'Gift Cards' },
@@ -251,6 +251,9 @@ export default function Navbar() {
             }}
           />
           <span>All</span>
+        </Link>
+        <Link to="/seller/register" className="border border-transparent hover:border-white px-2 py-1 cursor-pointer flex-shrink-0 font-bold text-[#FF9900]">
+          Sell on Amazon
         </Link>
         {categories.length > 0
           ? categories.map(cat => (

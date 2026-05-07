@@ -5,10 +5,7 @@ class AuthController {
     try {
       const { email, password } = req.body;
       const result = await AuthService.login(email, password);
-      res.json({
-        success: true,
-        ...result
-      });
+      res.json({ success: true, ...result });
     } catch (error) {
       res.status(401).json({ success: false, message: error.message });
     }
@@ -17,10 +14,16 @@ class AuthController {
   async register(req, res) {
     try {
       const result = await AuthService.register(req.body);
-      res.status(201).json({
-        success: true,
-        ...result
-      });
+      res.status(201).json({ success: true, ...result });
+    } catch (error) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
+
+  async sellerRegister(req, res) {
+    try {
+      const result = await AuthService.sellerRegister(req.body);
+      res.status(201).json({ success: true, ...result, message: 'Registration submitted. Await admin approval.' });
     } catch (error) {
       res.status(400).json({ success: false, message: error.message });
     }
