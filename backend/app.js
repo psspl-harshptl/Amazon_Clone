@@ -9,6 +9,7 @@ const app = express();
 // Middlewares
 const allowedOrigins = [
   process.env.CORS_ORIGIN,
+  "https://amazon-clone-harshptl.netlify.app",
   "http://localhost:5173",
   "http://localhost:3000",
 ].filter(Boolean);
