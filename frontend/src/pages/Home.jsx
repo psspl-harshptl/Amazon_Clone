@@ -67,15 +67,19 @@ const QuadGrid = ({ items }) => (
   </div>
 );
 
+const RV_KEY = 'amazon_recently_viewed';
+
 export default function Home() {
   const { user } = useAuth();
   const [bestSellers, setBestSellers] = useState([]);
   const [topDeals, setTopDeals] = useState([]);
+  const [recentlyViewed, setRecentlyViewed] = useState([]);
   const [loading, setLoading] = useState(true);
   const [heroIndex, setHeroIndex] = useState(0);
 
   const bestRef = useRef(null);
   const dealsRef = useRef(null);
+  const recentRef = useRef(null);
   const autoplayRef = useRef(null);
 
   const startAutoplay = useCallback(() => {
@@ -92,6 +96,13 @@ export default function Home() {
         const allProducts = res.data.data.rows || [];
         setBestSellers(allProducts.filter(p => p.is_best_seller));
         setTopDeals(allProducts.filter(p => p.is_top_deal));
+
+        if (user) {
+          const rv = await api.get('/recently-viewed');
+          setRecentlyViewed(rv.data.data || []);
+        } else {
+          setRecentlyViewed(JSON.parse(localStorage.getItem(RV_KEY) || '[]'));
+        }
       } catch (e) {
         console.error("Fetch error:", e);
       } finally {
@@ -100,7 +111,7 @@ export default function Home() {
     })();
     startAutoplay();
     return () => clearInterval(autoplayRef.current);
-  }, [startAutoplay]);
+  }, [startAutoplay, user]);
 
   const scroll = (ref, dir) => ref.current?.scrollBy({ left: dir === 'left' ? -800 : 800, behavior: 'smooth' });
 
@@ -225,6 +236,37 @@ export default function Home() {
           </div>
           <SliderArrow direction="right" onClick={() => scroll(dealsRef, 'right')} />
         </div>
+
+        {/* RECENTLY VIEWED SLIDER */}
+        {recentlyViewed.length > 0 && (
+          <div className="bg-white p-5 shadow-sm relative group">
+            <div className="flex items-baseline justify-between mb-4">
+              <h2 className="text-[21px] font-bold text-[#0F1111]">Your recently viewed items</h2>
+            </div>
+            <SliderArrow direction="left" onClick={() => scroll(recentRef, 'left')} />
+            <div ref={recentRef} className="flex overflow-x-auto gap-6 pb-4 scroll-smooth no-scrollbar">
+              {recentlyViewed.map((p) => (
+                <Link key={p.id} to={`/products/${p.id}`} className="min-w-[160px] w-[160px] flex flex-col group/card bg-white">
+                  <div className="h-[160px] bg-white flex items-center justify-center overflow-hidden mb-2 p-2">
+                    <img
+                      src={p.imageUrl}
+                      onError={(e) => { e.target.src = '/images/products/placeholder.png'; }}
+                      alt={p.name}
+                      className="w-full h-full object-contain group-hover/card:scale-105 transition-transform"
+                    />
+                  </div>
+                  <p className="text-[13px] text-[#007185] group-hover/card:text-[#C7511F] line-clamp-2 leading-snug mb-1">{p.name}</p>
+                  <StarRating rating={p.rating} count={p.reviewCount} />
+                  <div className="flex items-baseline font-bold text-[#0F1111] mt-1">
+                    <span className="text-xs align-top pt-0.5 mr-0.5">₹</span>
+                    <span className="text-lg">{Number(p.price).toLocaleString('en-IN')}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            <SliderArrow direction="right" onClick={() => scroll(recentRef, 'right')} />
+          </div>
+        )}
 
         {/* ROW 2: Categories */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
