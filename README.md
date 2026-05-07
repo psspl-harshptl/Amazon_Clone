@@ -18,16 +18,24 @@ Built with React, Node.js, Express, PostgreSQL, and Sequelize.
 
 ```
 amazonclone/
-├── backend/          # Express API
-├── frontend/         # React + Vite app
+├── backend/               # Express API
+│   ├── controllers/       # Request/response handlers
+│   ├── services/          # Business logic
+│   ├── models/            # Sequelize models
+│   ├── routes/            # Route definitions
+│   ├── middlewares/       # Auth, error handling
+│   ├── migrations/        # DB migrations
+│   ├── seeders/           # Sample data
+│   └── tests/             # Jest + supertest integration tests
+├── frontend/              # React 18 + Vite app
+│   └── src/
+│       ├── api/           # Axios instance
+│       ├── components/    # Reusable UI components
+│       ├── context/       # AuthContext, CartContext
+│       ├── pages/         # Route-level page components
+│       └── hooks/         # Custom hooks
+├── docs/                  # Architecture, API reference, design docs
 ├── CLAUDE.md
-├── architecture.md
-├── components.md
-├── pages.md
-├── state.md
-├── tech_stack.md
-├── api.md
-├── design_tokens.md
 └── README.md
 ```
 
@@ -59,7 +67,7 @@ DB_USER=postgres
 DB_PASSWORD=yourpassword
 JWT_SECRET=your_super_secret_key_minimum_32_chars
 JWT_EXPIRES_IN=7d
-CORS_ORIGIN=http://localhost:3000
+CORS_ORIGIN=http://localhost:5173
 ```
 
 Run migrations and seed data:
@@ -90,7 +98,7 @@ VITE_API_BASE_URL=http://localhost:5000/api/v1
 Start the frontend:
 ```bash
 npm run dev
-# App running at http://localhost:3000
+# App running at http://localhost:5173
 ```
 
 ---
@@ -110,6 +118,7 @@ npm run dev
 |--------|---------|-------------|
 | `npm run dev` | nodemon server.js | Dev server with auto-reload |
 | `npm start` | node server.js | Production start |
+| `npm test` | jest --forceExit --runInBand | Run integration test suite |
 | `npm run migrate` | sequelize-cli db:migrate | Run pending migrations |
 | `npm run seed` | sequelize-cli db:seed:all | Insert sample data |
 | `npm run migrate:undo` | sequelize-cli db:migrate:undo | Rollback last migration |
@@ -139,23 +148,48 @@ npm run dev
 - [x] Product specifications and reviews
 
 ### Cart
-- [x] Add to cart
-- [x] Update quantity
+- [x] Add to cart (API-backed for logged-in users, localStorage for guests)
+- [x] Update quantity (syncs to backend in real time)
 - [x] Remove item
 - [x] Clear cart
 - [x] Real-time cart count badge
+- [x] Guest cart auto-synced to backend on login
 
 ### Orders
-- [x] Place order (with shipping address)
-- [x] Order history
+- [x] Place order with shipping address (DB transaction, copies price at purchase)
+- [x] Online payment via Razorpay (card, UPI, netbanking)
+- [x] Cash on Delivery
+- [x] Order history (real API data only)
 - [x] Order detail view
 - [x] Order success confirmation page
+
+### Recently Viewed
+- [x] Tracks viewed products (API for logged-in users, localStorage for guests)
+- [x] Displayed on Home page
+
+---
+
+## Testing
+
+Integration tests use **Jest** + **supertest** and run against the real local database.
+
+```bash
+cd backend
+npm test
+```
+
+| Test file | What it covers |
+|-----------|---------------|
+| `tests/auth.test.js` | Register (success, duplicate, missing fields), Login (success, wrong password, unknown email), protected route guard |
+| `tests/cart.test.js` | Full cart lifecycle — empty cart, add item, quantity upsert, fetch with product data, update quantity, qty=0 auto-removes, delete item, 404 on re-delete, clear cart |
+
+> Tests create and clean up their own isolated DB records — safe to run against your dev database.
 
 ---
 
 ## API Documentation
 
-See `api.md` for complete endpoint reference with request/response examples.
+See `docs/api.md` for the complete endpoint reference with request/response examples.
 
 ---
 
@@ -176,14 +210,14 @@ docs: update README setup instructions
 
 | File | Description |
 |------|-------------|
-| `CLAUDE.md` | Claude Code configuration and rules |
-| `architecture.md` | System architecture, folder structure, DB schema |
-| `components.md` | All React components with props and design specs |
-| `pages.md` | All pages with layout, sections, routes |
-| `state.md` | State management, contexts, local state shapes |
-| `tech_stack.md` | Tech versions, setup code, npm packages |
-| `api.md` | Complete REST API reference |
-| `design_tokens.md` | Colors, typography, spacing from Figma |
+| `CLAUDE.md` | Claude Code configuration and project rules |
+| `docs/architecture.md` | System architecture, folder structure, DB schema |
+| `docs/components.md` | All React components with props and design specs |
+| `docs/pages.md` | All pages with layout, sections, routes |
+| `docs/state.md` | State management, contexts, local state shapes |
+| `docs/tech_stack.md` | Tech versions, setup code, npm packages |
+| `docs/api.md` | Complete REST API reference |
+| `docs/design_tokens.md` | Colors, typography, spacing |
 
 ---
 
