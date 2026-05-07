@@ -5,29 +5,24 @@ module.exports = (sequelize) => {
     static associate(models) {
       User.hasMany(models.Order, { foreignKey: 'userId', as: 'orders' });
       User.hasOne(models.Cart, { foreignKey: 'userId', as: 'cart' });
+      User.hasMany(models.Product, { foreignKey: 'sellerId', as: 'listings' });
     }
   }
 
   User.init({
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    email: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-      validate: { isEmail: true },
-    },
-    password: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
+    name: { type: DataTypes.STRING, allowNull: false },
+    email: { type: DataTypes.STRING, allowNull: false, unique: true, validate: { isEmail: true } },
+    password: { type: DataTypes.STRING, allowNull: false },
     role: {
-      type: DataTypes.ENUM('buyer', 'seller', 'admin'),
+      type: DataTypes.ENUM('buyer', 'seller', 'super_admin'),
       defaultValue: 'buyer',
     },
-    // New Profile & Address Fields
+    sellerStatus: {
+      type: DataTypes.ENUM('pending', 'approved', 'rejected'),
+      allowNull: true,
+      defaultValue: null,
+    },
+    sellerRejectionReason: { type: DataTypes.TEXT, allowNull: true },
     phone: DataTypes.STRING,
     address: DataTypes.STRING,
     city: DataTypes.STRING,

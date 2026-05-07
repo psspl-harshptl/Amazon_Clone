@@ -4,44 +4,24 @@ const { Op } = require('sequelize');
 class ProductService {
   async getAllProducts(query) {
     const {
-      limit = 20,
-      page = 1,
-      categoryId,
-      is_best_seller,
-      is_top_deal,
-      search,
-      brand,
-      minPrice,
-      maxPrice,
-      rating,
-      sort
+      limit = 20, page = 1, categoryId, is_best_seller, is_top_deal,
+      search, brand, minPrice, maxPrice, rating, sort
     } = query;
 
     const offset = (page - 1) * limit;
-
-    const where = {};
+    const where = { status: 'approved' }; // buyers only see approved products
 
     if (categoryId) where.categoryId = categoryId;
     if (is_best_seller === 'true') where.is_best_seller = true;
     if (is_top_deal === 'true') where.is_top_deal = true;
-
-    if (brand) {
-      where.brand = { [Op.in]: Array.isArray(brand) ? brand : [brand] };
-    }
-
+    if (brand) where.brand = { [Op.in]: Array.isArray(brand) ? brand : [brand] };
     if (minPrice || maxPrice) {
       where.price = {};
       if (minPrice) where.price[Op.gte] = parseFloat(minPrice);
       if (maxPrice) where.price[Op.lte] = parseFloat(maxPrice);
     }
-
-    if (rating) {
-      where.rating = { [Op.gte]: parseFloat(rating) };
-    }
-
-    if (search) {
-      where.name = { [Op.iLike]: `%${search}%` };
-    }
+    if (rating) where.rating = { [Op.gte]: parseFloat(rating) };
+    if (search) where.name = { [Op.iLike]: `%${search}%` };
 
     let order = [['createdAt', 'DESC']];
     if (sort === 'price-low') order = [['price', 'ASC']];
@@ -59,17 +39,15 @@ class ProductService {
 
   async getFilters(query) {
     const { categoryId } = query;
-    const where = {};
+    const where = { status: 'approved' };
     if (categoryId) where.categoryId = categoryId;
 
-    // Get unique brands
     const brands = await Product.findAll({
       where: { ...where, brand: { [Op.ne]: null } },
       attributes: [[Sequelize.fn('DISTINCT', Sequelize.col('brand')), 'brand']],
       raw: true
     });
 
-    // Get min/max price
     const priceStats = await Product.findOne({
       where,
       attributes: [
@@ -89,7 +67,8 @@ class ProductService {
   }
 
   async getProductById(id) {
-    return await Product.findByPk(id, {
+    const product = await Product.findOne({
+      where: { id, status: 'approved' },
       include: [
         { model: Category, as: 'category' },
         { model: ProductImage, as: 'galleryImages' },
@@ -97,6 +76,10 @@ class ProductService {
         { model: ProductFeature, as: 'features' }
       ]
     });
+    if (product) {
+      await product.increment('viewCount', { by: 1 });
+    }
+    return product;
   }
 
   async getAllCategories() {
