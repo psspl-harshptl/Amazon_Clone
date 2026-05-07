@@ -3,82 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 
-/* ── Dummy order history data ── */
-const DUMMY_ORDERS = [
-  {
-    id: 'D-9876543',
-    isDummy: true,
-    totalAmount: '1499.00',
-    status: 'delivered',
-    paymentMethod: 'UPI',
-    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    deliveredAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    shippingAddress: { name: 'Home', city: 'Ahmedabad', state: 'Gujarat' },
-    items: [
-      {
-        id: 'd1',
-        quantity: 1,
-        priceAtPurchase: '1499.00',
-        product: {
-          name: 'boAt Rockerz 450 Bluetooth On Ear Headphones with Mic, Upto 15 Hours Playback, Padded Ear Cushions',
-          imageUrl: '/images/products/headphones.png',
-        },
-      },
-    ],
-  },
-  {
-    id: 'D-8765432',
-    isDummy: true,
-    totalAmount: '3299.00',
-    status: 'delivered',
-    paymentMethod: 'Razorpay',
-    createdAt: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000).toISOString(),
-    deliveredAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-    shippingAddress: { name: 'Home', city: 'Ahmedabad', state: 'Gujarat' },
-    items: [
-      {
-        id: 'd2',
-        quantity: 1,
-        priceAtPurchase: '2499.00',
-        product: {
-          name: 'Noise ColorFit Pro 4 Max 1.8" Display Smartwatch with Bluetooth Calling, Built-in Alexa',
-          imageUrl: '/images/products/smartwatch.png',
-        },
-      },
-      {
-        id: 'd3',
-        quantity: 2,
-        priceAtPurchase: '400.00',
-        product: {
-          name: 'AmazonBasics USB Type-C to Lightning Cable, MFi Certified Charger',
-          imageUrl: '/images/products/usb-cable.png',
-        },
-      },
-    ],
-  },
-  {
-    id: 'D-7654321',
-    isDummy: true,
-    totalAmount: '649.00',
-    status: 'delivered',
-    paymentMethod: 'COD',
-    createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-    deliveredAt: new Date(Date.now() - 26 * 24 * 60 * 60 * 1000).toISOString(),
-    shippingAddress: { name: 'Home', city: 'Ahmedabad', state: 'Gujarat' },
-    items: [
-      {
-        id: 'd4',
-        quantity: 1,
-        priceAtPurchase: '649.00',
-        product: {
-          name: 'Lakme Eyeconic Kajal, Black, 0.35g + Lakme 9 to 5 Primer + Matte Lipstick Set',
-          imageUrl: '/images/products/cosmetics.png',
-        },
-      },
-    ],
-  },
-];
-
 /* ── Helpers ── */
 const fmtDate = (iso) => {
   const d = new Date(iso);
@@ -169,16 +93,11 @@ const OrderCard = ({ order }) => {
         </div>
         <div className="text-right">
           <p className="text-[11px] uppercase tracking-wider text-gray-500 font-bold">
-            Order # {order.isDummy ? order.id : `406-${String(order.id).padStart(7, '0')}-${String(order.id * 1234567 % 9999999).padStart(7, '0')}`}
+            Order # 406-{String(order.id).padStart(7, '0')}-{String(order.id * 1234567 % 9999999).padStart(7, '0')}
           </p>
-          {!order.isDummy && (
-            <Link to={`/orders/${order.id}`} className="text-[#007185] hover:text-[#C7511F] hover:underline text-[13px]">
-              View order details
-            </Link>
-          )}
-          {order.isDummy && (
-            <span className="text-[#007185] cursor-default text-[13px]">View order details</span>
-          )}
+          <Link to={`/orders/${order.id}`} className="text-[#007185] hover:text-[#C7511F] hover:underline text-[13px]">
+            View order details
+          </Link>
         </div>
       </div>
 
@@ -292,19 +211,14 @@ export default function OrderHistory() {
     fetchOrders();
   }, [user]);
 
-  // Merge real orders first, then dummy ones
-  const allOrders = [...realOrders, ...DUMMY_ORDERS];
-  const hasRealOrders = realOrders.length > 0;
-  const totalCount = allOrders.length;
-
   // Filter by search
   const filteredOrders = searchQuery
-    ? allOrders.filter((o) =>
+    ? realOrders.filter((o) =>
         o.items.some((item) =>
           item.product?.name?.toLowerCase().includes(searchQuery.toLowerCase())
         )
       )
-    : allOrders;
+    : realOrders;
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-[#EAEDED]">
@@ -325,8 +239,7 @@ export default function OrderHistory() {
     </div>
   );
 
-  // No orders at all (no real, show empty)
-  if (!hasRealOrders) return (
+  if (realOrders.length === 0) return (
     <div className="min-h-screen bg-[#EAEDED] pb-16">
       {/* Breadcrumb */}
       <div className="max-w-[1100px] mx-auto px-4 pt-5">
@@ -397,7 +310,7 @@ export default function OrderHistory() {
 
         {/* ── Orders Count + Filter ── */}
         <div className="flex items-center gap-2 mb-5 text-[14px]">
-          <span className="font-bold text-[#0F1111]">{filteredOrders.length} orders</span>
+          <span className="font-bold text-[#0F1111]">{filteredOrders.length} {filteredOrders.length === 1 ? 'order' : 'orders'}</span>
           <span className="text-[#0F1111]">placed in</span>
           <select className="border border-[#888c8c] rounded-lg px-2 py-1 text-[13px] text-[#0F1111] bg-[#f0f2f2] cursor-pointer outline-none focus:ring-2 ring-[#e77600]">
             <option>past 3 months</option>
@@ -410,8 +323,8 @@ export default function OrderHistory() {
         {/* ── Order Cards ── */}
         <div className="space-y-5">
           {filteredOrders.length > 0 ? (
-            filteredOrders.map((order, idx) => (
-              <OrderCard key={order.isDummy ? order.id : `real-${order.id}`} order={order} />
+            filteredOrders.map((order) => (
+              <OrderCard key={order.id} order={order} />
             ))
           ) : (
             <div className="bg-white border border-[#d5d9d9] rounded-lg p-10 text-center">
