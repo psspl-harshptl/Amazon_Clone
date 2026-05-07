@@ -2,6 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
+
+const RV_KEY = 'amazon_recently_viewed';
+
+function saveToLocalStorage(p) {
+  const stored = JSON.parse(localStorage.getItem(RV_KEY) || '[]');
+  const filtered = stored.filter(item => item.id !== p.id);
+  const updated = [
+    { id: p.id, name: p.name, price: p.price, imageUrl: p.imageUrl, rating: p.rating, reviewCount: p.reviewCount, discount_percent: p.discount_percent },
+    ...filtered
+  ].slice(0, 10);
+  localStorage.setItem(RV_KEY, JSON.stringify(updated));
+}
 
 const StarRating = ({ rating, count, size = "w-4 h-4" }) => (
   <div className="flex items-center gap-1">
@@ -20,6 +33,7 @@ const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { user } = useAuth();
   
   const [product, setProduct] = useState(null);
   const [activeImg, setActiveImg] = useState('');
@@ -39,6 +53,11 @@ const ProductDetail = () => {
           setProduct(p);
           const mainImg = p.galleryImages?.find(img => img.isMain)?.url || p.imageUrl || '/images/products/placeholder.png';
           setActiveImg(mainImg);
+          if (user) {
+            api.post('/recently-viewed', { productId: Number(id) }).catch(() => {});
+          } else {
+            saveToLocalStorage(p);
+          }
         } else {
           setError('Product not found');
         }

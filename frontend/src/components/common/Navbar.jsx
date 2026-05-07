@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../api/axios';
 
 /* ── REFINED Cart icon ── */
 const CartIcon = ({ count }) => (
@@ -36,7 +37,32 @@ const NAV_ITEMS = [
 export default function Navbar() {
   const { cartCount, toggleDrawer } = useCart();
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [categories, setCategories] = useState([]);
+
+  // Fetch categories for the search dropdown
+  useEffect(() => {
+    api.get('/products/categories')
+      .then(res => setCategories(res.data.data || []))
+      .catch(() => {});
+  }, []);
+
+  // Sync search input with URL when on /products page
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    setSearchQuery(params.get('search') || '');
+  }, [location.pathname]);
+
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+    if (searchQuery.trim()) params.set('search', searchQuery.trim());
+    if (selectedCategory !== 'all') params.set('categoryId', selectedCategory);
+    navigate(`/products?${params.toString()}`);
+  };
 
   // Helper for initials
   const getInitials = (userData) => {
@@ -112,15 +138,31 @@ export default function Navbar() {
         <div className="flex-grow min-w-0 mx-1">
           <div className="flex h-[40px] rounded overflow-hidden focus-within:ring-2 ring-[#FF9900]">
             <div className="relative flex-shrink-0">
-              <select className="appearance-none bg-[#e3e6e6] text-[#0F1111] text-[12px] pl-2 pr-6 h-full border-r border-[#cdcdcd] outline-none cursor-pointer">
-                <option>All</option>
-                <option>Electronics</option>
+              <select
+                value={selectedCategory}
+                onChange={e => setSelectedCategory(e.target.value)}
+                className="appearance-none bg-[#e3e6e6] text-[#0F1111] text-[12px] pl-2 pr-6 h-full border-r border-[#cdcdcd] outline-none cursor-pointer"
+              >
+                <option value="all">All</option>
+                {categories.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
               </select>
               <svg className="absolute right-1 top-1/2 -translate-y-1/2 w-3 h-3 text-[#555]" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" /></svg>
             </div>
-            <input type="text" placeholder="Search AmazonClone.in" className="flex-grow px-3 text-[#0F1111] text-[14px] outline-none" />
-            <button className="bg-[#FF9900] hover:bg-[#e68a00] w-[46px] flex items-center justify-center transition-colors">
-              <div 
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSearch()}
+              placeholder="Search AmazonClone.in"
+              className="flex-grow px-3 text-[#0F1111] text-[14px] outline-none"
+            />
+            <button
+              onClick={handleSearch}
+              className="bg-[#FF9900] hover:bg-[#e68a00] w-[46px] flex items-center justify-center transition-colors"
+            >
+              <div
                 className="w-[21px] h-[21px]"
                 style={{
                   backgroundImage: 'url("/nav-sprite.png")',
@@ -198,8 +240,8 @@ export default function Navbar() {
 
       {/* ══ SECONDARY NAV ══ */}
       <div className="bg-[#232F3E] text-white flex items-center h-[38px] px-2 overflow-x-auto whitespace-nowrap text-[13px] no-scrollbar">
-        <div className="border border-transparent hover:border-white flex items-center gap-1 px-2 py-1 cursor-pointer font-bold">
-          <div 
+        <Link to="/products" className="border border-transparent hover:border-white flex items-center gap-1 px-2 py-1 cursor-pointer font-bold flex-shrink-0">
+          <div
             className="w-[17px] h-[14px]"
             style={{
               backgroundImage: 'url("/nav-sprite.png")',
@@ -209,12 +251,27 @@ export default function Navbar() {
             }}
           />
           <span>All</span>
-        </div>
-        {NAV_ITEMS.map(({ label }) => (
-          <div key={label} className="border border-transparent hover:border-white px-2 py-1 cursor-pointer flex-shrink-0 font-normal">
-            {label}
-          </div>
-        ))}
+        </Link>
+        {categories.length > 0
+          ? categories.map(cat => (
+              <Link
+                key={cat.id}
+                to={`/products?categoryId=${cat.id}`}
+                className="border border-transparent hover:border-white px-2 py-1 cursor-pointer flex-shrink-0 font-normal"
+              >
+                {cat.name}
+              </Link>
+            ))
+          : NAV_ITEMS.map(({ label }) => (
+              <Link
+                key={label}
+                to={`/products?search=${encodeURIComponent(label)}`}
+                className="border border-transparent hover:border-white px-2 py-1 cursor-pointer flex-shrink-0 font-normal"
+              >
+                {label}
+              </Link>
+            ))
+        }
       </div>
     </header>
   );
