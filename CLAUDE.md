@@ -4,6 +4,25 @@
 - `/pr-review` — runs PR diff review (see `.claude/commands/pr-review.md`)
 - `/spec` — expand a vague feature idea into a structured spec before coding starts
 
+## Agents
+- **`playwright-qa-engineer`** — end-to-end QA agent; invoke via `Agent` tool with `subagent_type: "playwright-qa-engineer"`
+
+### When to invoke `playwright-qa-engineer` (proactively, without being asked)
+| Trigger | Example |
+|---------|---------|
+| A full page or flow is completed | "Cart and Checkout are done" |
+| Auth system wired up (login, JWT, ProtectedRoute) | "Auth is done" |
+| Pre-deployment / pre-PR for main | "Ready to ship / merge" |
+| After a significant refactor touching multiple files | refactored cart service, order controller |
+| User explicitly requests a QA pass | "Run QA", "test this", "check the flow" |
+
+### Review-and-iterate loop
+After the agent reports findings:
+1. Triage failures by severity (Critical → High → Medium → Low)
+2. Implement fixes directly in code for Critical/High issues
+3. Re-invoke the agent targeting only the fixed flows to confirm resolution
+4. Repeat until no Critical/High failures remain
+
 ## Stack
 - **Frontend:** React 18, Tailwind CSS, Axios, React Router v6
 - **Backend:** Node.js, Express.js
@@ -129,6 +148,12 @@ cd frontend && npm i && npm run dev
 
 ---
 
+## Tooling
+- **Context7** — use Context7 MCP to check up-to-date docs when implementing new libraries or frameworks or adding features using them
+- **playwright-qa-engineer agent** — after completing any feature or flow, invoke this agent to run a full QA pass; implement its Critical/High findings before marking work done
+
+---
+
 ## Response Style
 - **Be concise** — no trailing summaries, no restating what was just done
 - **Code first** — for implementation tasks, show code before explanations
@@ -137,4 +162,3 @@ cd frontend && npm i && npm run dev
 - **File references** — always link files as `[path](path#Lline)` so they are clickable
 - **Errors** — explain root cause in one sentence, then show the fix; skip the backstory
 - **Scope guard** — if the request would break a Hard Rule above, refuse and explain why in one line
-

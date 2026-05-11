@@ -7,7 +7,7 @@ import api from '../api/axios';
 import upi from '/upi.png';
 
 const Checkout = () => {
-   const { cart, cartSubtotal, clearCart } = useCart();
+   const { cart, cartSubtotal, clearCart, loading: cartLoading } = useCart();
    const { user } = useAuth();
    const navigate = useNavigate();
 
@@ -23,10 +23,12 @@ const Checkout = () => {
    const [orderSuccess, setOrderSuccess] = useState(false);
 
    useEffect(() => {
-      if (cart.length === 0 && !orderSuccess) {
+      // Wait for cart to finish loading before redirecting — prevents race condition
+      // on direct navigation where cart context hasn't fetched yet
+      if (!cartLoading && cart.length === 0 && !orderSuccess) {
          navigate('/cart');
       }
-   }, [cart, navigate, orderSuccess]);
+   }, [cart, cartLoading, navigate, orderSuccess]);
 
    // Helper to load Razorpay script
    const loadRazorpay = () => {

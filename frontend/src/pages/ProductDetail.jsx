@@ -104,7 +104,7 @@ const ProductDetail = () => {
         <span className="text-[#565959] font-medium">{product.name}</span>
       </nav>
 
-      <main className="max-w-[1500px] mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-8 py-6">
+      <div className="max-w-[1500px] mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-8 py-6">
         {/* Left: Gallery */}
         <div className="lg:col-span-5 flex flex-col md:flex-row gap-4">
           {/* Thumbnails */}
@@ -119,7 +119,7 @@ const ProductDetail = () => {
                 <img
                   src={img.url}
                   onError={(e) => { e.target.src = '/images/products/placeholder.png'; }}
-                  alt="thumb"
+                  alt={`${product.name} thumbnail ${i + 1}`}
                   className="w-full h-full object-contain"
                 />
               </div>
@@ -197,7 +197,7 @@ const ProductDetail = () => {
             </button>
           </div>
         </div>
-      </main>
+      </div>
 
       {/* ── COMBINED DETAIL SECTION ────────────────────────────────────────── */}
       <div className="bg-white border-t border-gray-200 mt-10">
