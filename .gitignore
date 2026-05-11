@@ -8,6 +8,7 @@ backend/public/uploads/
 
 # Testing
 coverage/
+.playwright-mcp/
 
 # Production
 dist/
