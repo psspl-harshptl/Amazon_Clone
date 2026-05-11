@@ -7,6 +7,7 @@
 
 ## Route Map
 
+### Buyer Routes
 | Route | Page | Access |
 |-------|------|--------|
 | `/login` | Login.jsx | Public (redirect if logged in) |
@@ -14,11 +15,29 @@
 | `/` | Home.jsx | Public |
 | `/products` | ProductList.jsx | Public |
 | `/products/:id` | ProductDetail.jsx | Public |
-| `/cart` | Cart.jsx | **Private** |
-| `/checkout` | Checkout.jsx | **Private** |
-| `/orders` | OrderHistory.jsx | **Private** |
-| `/orders/:id` | OrderDetail.jsx | **Private** |
-| `/orders/:id/success` | OrderSuccess.jsx | **Private** |
+| `/cart` | Cart.jsx | **Private — buyer JWT** |
+| `/checkout` | Checkout.jsx | **Private — buyer JWT** |
+| `/orders` | OrderHistory.jsx | **Private — buyer JWT** |
+| `/orders/:id` | OrderDetail.jsx | **Private — buyer JWT** |
+| `/orders/:id/success` | OrderSuccess.jsx | **Private — buyer JWT** |
+
+### Seller Routes
+| Route | Page | Access |
+|-------|------|--------|
+| `/seller/login` | SellerLogin.jsx | Public (seller only) |
+| `/seller/register` | SellerRegister.jsx | Public |
+| `/seller/dashboard` | SellerDashboard.jsx | **Private — approved seller** |
+| `/seller/listings` | MyListings.jsx | **Private — approved seller** |
+| `/seller/listings/new` | CreateListing.jsx | **Private — approved seller** |
+| `/seller/listings/:id/edit` | EditListing.jsx | **Private — approved seller** |
+
+### Admin Routes
+| Route | Page | Access |
+|-------|------|--------|
+| `/admin/login` | AdminLogin.jsx | Public (super_admin only) |
+| `/admin/dashboard` | AdminDashboard.jsx | **Private — super_admin** |
+| `/admin/products` | AdminProducts.jsx | **Private — super_admin** |
+| `/admin/sellers` | AdminSellers.jsx | **Private — super_admin** |
 
 ---
 
@@ -317,3 +336,222 @@ Order Details  |  Order# 123-456-789  Placed on 24 Apr 2025
 ─────────────────────────────────────
 [Footer]
 ```
+
+---
+
+# Seller Pages
+
+> All seller pages use a `<SellerNavbar />` instead of the buyer `<Navbar />`. No buyer footer is shown.
+
+---
+
+## SellerLogin.jsx
+
+**Route:** `/seller/login`
+
+**Layout:**
+```
+[SellerNavbar — logo only]
+─────────────────────────────────────
+         [AmazonClone Seller Logo]
+  ┌────────────────────────────────┐
+  │  Seller Sign In                │
+  │  Email            [____]       │
+  │  Password         [____]       │
+  │  [Sign In]                     │  ← #FFD814 full-width btn
+  └────────────────────────────────┘
+  New seller? [Register here]
+─────────────────────────────────────
+```
+
+**Behavior:**
+- On success: checks `user.role`. If not `seller`, shows error "Not a seller account".
+- If `sellerStatus === 'pending'`: shows "Your application is under review."
+- If `sellerStatus === 'rejected'`: shows rejection reason.
+- If `sellerStatus === 'approved'`: redirects to `/seller/dashboard`.
+
+---
+
+## SellerRegister.jsx
+
+**Route:** `/seller/register`
+
+**Fields:** Name, Email, Password, Phone  
+**Button:** `[Create Seller Account]` — `#FFD814`
+
+**Post-submit state:** Replaces form with an "Application Submitted" confirmation card:
+```
+✅ Application Submitted
+Your seller account is under review. We'll notify you once approved.
+[Back to home]
+```
+
+---
+
+## SellerDashboard.jsx
+
+**Route:** `/seller/dashboard`
+
+**Layout:**
+```
+[SellerNavbar]
+─────────────────────────────────────
+  Welcome, [SellerName]
+
+  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐
+  │  Total   │ │ Pending  │ │ Approved │ │ Rejected │
+  │    12    │ │    3     │ │    8     │ │    1     │
+  └──────────┘ └──────────┘ └──────────┘ └──────────┘
+
+  Recent Listings
+  ┌──────────────────────────────────────────────────┐
+  │ Name           │ Status   │ Price  │ Stock │ Date │
+  ├──────────────────────────────────────────────────┤
+  │ Bluetooth Spkr │ approved │ ₹1,299 │  20   │ ... │
+  └──────────────────────────────────────────────────┘
+
+  [+ Add New Listing]  →  /seller/listings/new
+─────────────────────────────────────
+```
+
+**Stats cards:** Total | Pending | Approved | Rejected (colored badge per status)
+
+---
+
+## MyListings.jsx
+
+**Route:** `/seller/listings`
+
+**Layout:**
+```
+[SellerNavbar]
+─────────────────────────────────────
+  My Listings                [+ Add Listing]
+
+  Filter: [All ▼] [Pending] [Approved] [Rejected]
+
+  ┌─────────────────────────────────────────────────────┐
+  │ Name         │ Price  │ Stock │ Status   │ Actions   │
+  ├─────────────────────────────────────────────────────┤
+  │ Product Name │ ₹1,299 │  20   │ approved │ [Edit][✕] │
+  └─────────────────────────────────────────────────────┘
+─────────────────────────────────────
+```
+
+**Status badges:** `pending` → yellow, `approved` → green, `rejected` → red  
+**Rejection reason:** Shown inline below the product row when `status === 'rejected'`
+
+---
+
+## CreateListing.jsx
+
+**Route:** `/seller/listings/new`
+
+**Layout:** Page wrapper with `<ListingForm />` in create mode. On submit → `POST /seller/products` → redirects to `/seller/listings`.
+
+---
+
+## EditListing.jsx
+
+**Route:** `/seller/listings/:id/edit`
+
+**Layout:** Loads product by ID → renders `<ListingForm />` pre-filled with existing data. On submit → `PUT /seller/products/:id` → redirects to `/seller/listings`.
+
+---
+
+# Admin Pages
+
+> All admin pages use an `<AdminSidebar />` layout — no buyer Navbar or Footer.
+
+---
+
+## AdminLogin.jsx
+
+**Route:** `/admin/login`
+
+**Layout:** Same centered card as buyer Login.  
+**Behavior:** Checks `user.role === 'super_admin'`. Any other role shows "Access denied." On success redirects to `/admin/dashboard`.
+
+---
+
+## AdminDashboard.jsx
+
+**Route:** `/admin/dashboard`
+
+**Layout:**
+```
+[AdminSidebar] │ [Main content]
+               │
+               │  Platform Overview
+               │
+               │  Products
+               │  ┌────────┐ ┌─────────┐ ┌──────────┐ ┌──────────┐
+               │  │ Total  │ │ Pending │ │ Approved │ │ Rejected │
+               │  │  148   │ │   12    │ │   130    │ │    6     │
+               │  └────────┘ └─────────┘ └──────────┘ └──────────┘
+               │
+               │  Sellers
+               │  ┌────────┐ ┌─────────┐ ┌──────────┐ ┌──────────┐
+               │  │ Total  │ │ Pending │ │ Approved │ │ Rejected │
+               │  │   20   │ │    5    │ │    14    │ │    1     │
+               │  └────────┘ └─────────┘ └──────────┘ └──────────┘
+               │
+               │  Top Viewed Products
+               │  ┌──────────────────────────────────────────┐
+               │  │ # │ Name              │ Views │ Status   │
+               │  ├──────────────────────────────────────────┤
+               │  │ 1 │ Sony WH-1000XM5   │ 8,102 │ approved │
+               │  └──────────────────────────────────────────┘
+```
+
+---
+
+## AdminProducts.jsx
+
+**Route:** `/admin/products`
+
+**Layout:**
+```
+[AdminSidebar] │ Products Management
+               │
+               │ Tabs: [All] [Pending (12)] [Approved] [Rejected]
+               │ Search: [search products...]
+               │
+               │ ┌──────────────────────────────────────────────────────┐
+               │ │ Name │ Seller │ Price │ Status │ Actions              │
+               │ ├──────────────────────────────────────────────────────┤
+               │ │ ... │ ravi@  │ ₹1,299│ pending│ [✓ Approve][✗ Reject]│
+               │ └──────────────────────────────────────────────────────┘
+               │
+               │ [Reject modal — textarea for rejection reason]
+```
+
+**Actions:**
+- Approve → `PUT /admin/products/:id/approve`
+- Reject → opens modal, submits reason → `PUT /admin/products/:id/reject`
+- Delete → `DELETE /admin/products/:id`
+
+---
+
+## AdminSellers.jsx
+
+**Route:** `/admin/sellers`
+
+**Layout:**
+```
+[AdminSidebar] │ Seller Management
+               │
+               │ Tabs: [All] [Pending (5)] [Approved] [Rejected]
+               │
+               │ ┌──────────────────────────────────────────────────────┐
+               │ │ Name       │ Email        │ Joined  │ Status │ Actions│
+               │ ├──────────────────────────────────────────────────────┤
+               │ │ Ravi Sharma│ ravi@myshop  │ 1 May   │ pending│ [✓][✗] │
+               │ └──────────────────────────────────────────────────────┘
+               │
+               │ [Reject modal — optional reason textarea]
+```
+
+**Actions:**
+- Approve → `PUT /admin/sellers/:id/approve`
+- Reject → opens modal with optional reason → `PUT /admin/sellers/:id/reject`
