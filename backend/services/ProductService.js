@@ -27,6 +27,8 @@ class ProductService {
     if (sort === 'price-low') order = [['price', 'ASC']];
     if (sort === 'price-high') order = [['price', 'DESC']];
     if (sort === 'rating') order = [['rating', 'DESC']];
+    if (sort === 'newest') order = [['createdAt', 'DESC']];
+    if (sort === 'oldest') order = [['createdAt', 'ASC']];
 
     return await Product.findAndCountAll({
       where,

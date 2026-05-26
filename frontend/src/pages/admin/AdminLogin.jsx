@@ -23,7 +23,7 @@ export default function AdminLogin() {
           setError('This portal is for administrators only.');
           return;
         }
-        localStorage.setItem('amazon_token', token);
+        sessionStorage.setItem('amazon_token', token);
         login(user);
         navigate('/admin/dashboard');
       }

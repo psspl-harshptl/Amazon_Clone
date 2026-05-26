@@ -36,7 +36,7 @@ const Register = () => {
       });
       
       if (res.data.success) {
-        localStorage.setItem('amazon_token', res.data.token);
+        sessionStorage.setItem('amazon_token', res.data.token);
         login(res.data.user);
         navigate('/');
       }

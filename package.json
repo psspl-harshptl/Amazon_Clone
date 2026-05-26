@@ -1,0 +1,27 @@
+{
+  "name": "amazon_clone",
+  "version": "1.0.0",
+  "description": "A full-stack Amazon-like eCommerce application (Buyer Module only).  \r Built with React, Node.js, Express, PostgreSQL, and Sequelize.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/psspl-harshptl/Amazon_Clone.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/psspl-harshptl/Amazon_Clone/issues"
+  },
+  "homepage": "https://github.com/psspl-harshptl/Amazon_Clone#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.60.0"
+  }
+}

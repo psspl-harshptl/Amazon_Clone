@@ -1,4 +1,4 @@
-const { Product, User, Category, Sequelize } = require('../models');
+const { Product, User, Category, CategoryRequest, Order, OrderItem, Sequelize } = require('../models');
 const { Op } = require('sequelize');
 
 class AdminService {
@@ -98,6 +98,63 @@ class AdminService {
     const json = seller.toJSON();
     delete json.password;
     return json;
+  }
+
+  // ── Category Requests ─────────────────────────────────────────────────────
+
+  async getCategoryRequests(query = {}) {
+    const where = {};
+    if (query.status) where.status = query.status;
+    return CategoryRequest.findAll({
+      where,
+      include: [{ model: User, as: 'seller', attributes: ['id', 'name', 'email'] }],
+      order: [['createdAt', 'DESC']],
+    });
+  }
+
+  async approveCategoryRequest(id) {
+    const req = await CategoryRequest.findByPk(id);
+    if (!req) throw new Error('Category request not found');
+    if (req.status !== 'pending') throw new Error('Request has already been processed');
+    const slug = req.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const category = await Category.create({ name: req.name, slug });
+    await req.update({ status: 'approved' });
+    return { request: req, category };
+  }
+
+  async rejectCategoryRequest(id, reason) {
+    const req = await CategoryRequest.findByPk(id);
+    if (!req) throw new Error('Category request not found');
+    await req.update({ status: 'rejected', rejectionReason: reason || null });
+    return req;
+  }
+
+  // ── Orders ───────────────────────────────────────────────────────────────
+
+  async getAllOrders(query = {}) {
+    const { status, page = 1, limit = 20 } = query;
+    const where = {};
+    if (status) where.status = status;
+
+    return Order.findAndCountAll({
+      where,
+      limit: parseInt(limit),
+      offset: (page - 1) * limit,
+      include: [
+        { model: User,      as: 'user',  attributes: ['id', 'name', 'email'] },
+        { model: OrderItem, as: 'items', include: [{ model: Product, as: 'product', attributes: ['id', 'name', 'imageUrl'] }] },
+      ],
+      order: [['createdAt', 'DESC']],
+    });
+  }
+
+  async updateOrderStatus(orderId, status) {
+    const allowed = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
+    if (!allowed.includes(status)) throw new Error('Invalid status value');
+    const order = await Order.findByPk(orderId);
+    if (!order) throw new Error('Order not found');
+    await order.update({ status });
+    return order;
   }
 
   // ── Dashboard ─────────────────────────────────────────────────────────────

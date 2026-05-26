@@ -28,6 +28,8 @@ import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminSellers from './pages/admin/AdminSellers';
+import AdminCategories from './pages/admin/AdminCategories';
+import AdminOrders from './pages/admin/AdminOrders';
 
 // Layout
 import Navbar from './components/common/Navbar';
@@ -106,6 +108,8 @@ function AppContent() {
           <Route path="/admin/dashboard"      element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           <Route path="/admin/products"       element={<AdminRoute><AdminProducts /></AdminRoute>} />
           <Route path="/admin/sellers"        element={<AdminRoute><AdminSellers /></AdminRoute>} />
+          <Route path="/admin/categories"     element={<AdminRoute><AdminCategories /></AdminRoute>} />
+          <Route path="/admin/orders"         element={<AdminRoute><AdminOrders /></AdminRoute>} />
 
           <Route path="*"                     element={<Navigate to="/" replace />} />
         </Routes>

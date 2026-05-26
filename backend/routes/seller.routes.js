@@ -6,10 +6,11 @@ const sellerController = require('../controllers/sellerController');
 
 router.use(authMiddleware, requireApprovedSeller);
 
-router.get('/dashboard',    sellerController.getDashboard);
-router.get('/products',     sellerController.getMyProducts);
-router.post('/products',    sellerController.createProduct);
-router.put('/products/:id', sellerController.updateProduct);
-router.delete('/products/:id', sellerController.deleteProduct);
+router.get('/dashboard',          sellerController.getDashboard);
+router.get('/products',           sellerController.getMyProducts);
+router.post('/products',          sellerController.createProduct);
+router.put('/products/:id',       sellerController.updateProduct);
+router.delete('/products/:id',    sellerController.deleteProduct);
+router.post('/category-requests', sellerController.requestCategory);
 
 module.exports = router;

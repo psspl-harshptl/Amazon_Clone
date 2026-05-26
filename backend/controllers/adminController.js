@@ -92,6 +92,52 @@ class AdminController {
       res.status(400).json({ success: false, message: error.message });
     }
   }
+
+  // Orders
+  async getAllOrders(req, res) {
+    try {
+      const data = await AdminService.getAllOrders(req.query);
+      res.json({ success: true, data });
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async updateOrderStatus(req, res) {
+    try {
+      const order = await AdminService.updateOrderStatus(req.params.id, req.body.status);
+      res.json({ success: true, data: order });
+    } catch (error) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
+
+  async getCategoryRequests(req, res) {
+    try {
+      const data = await AdminService.getCategoryRequests(req.query);
+      res.json({ success: true, data });
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async approveCategoryRequest(req, res) {
+    try {
+      const data = await AdminService.approveCategoryRequest(req.params.id);
+      res.json({ success: true, data, message: 'Category approved and created' });
+    } catch (error) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
+
+  async rejectCategoryRequest(req, res) {
+    try {
+      const data = await AdminService.rejectCategoryRequest(req.params.id, req.body.reason);
+      res.json({ success: true, data, message: 'Category request rejected' });
+    } catch (error) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
 }
 
 module.exports = new AdminController();

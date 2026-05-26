@@ -16,26 +16,37 @@ export const AuthProvider = ({ children }) => {
 
   // Load user from localStorage on mount
   useEffect(() => {
-    const savedUser = localStorage.getItem('amazon_user');
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (e) {
-        console.error('Failed to parse user', e);
-      }
+    const token = sessionStorage.getItem('amazon_token');
+    if (!token) {
+      setLoading(false);
+      return;
     }
-    setLoading(false);
+    api.get('/auth/me')
+      .then(res => {
+        if (res.data.success && res.data.data) {
+          setUser(res.data.data);
+          sessionStorage.setItem('amazon_user', JSON.stringify(res.data.data));
+        } else {
+          sessionStorage.removeItem('amazon_token');
+          sessionStorage.removeItem('amazon_user');
+        }
+      })
+      .catch(() => {
+        // 401 interceptor in axios.js handles token removal & redirect
+        setUser(null);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const login = (userData) => {
     setUser(userData);
-    localStorage.setItem('amazon_user', JSON.stringify(userData));
+    sessionStorage.setItem('amazon_user', JSON.stringify(userData));
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('amazon_user');
-    localStorage.removeItem('amazon_token');
+    sessionStorage.removeItem('amazon_user');
+    sessionStorage.removeItem('amazon_token');
     window.location.href = '/';
   };
 
