@@ -160,6 +160,7 @@ export default function Navbar() {
             />
             <button
               onClick={handleSearch}
+              aria-label="Search"
               className="bg-[#FF9900] hover:bg-[#e68a00] w-[46px] flex items-center justify-center transition-colors"
             >
               <div

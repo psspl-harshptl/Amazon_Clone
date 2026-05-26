@@ -224,8 +224,8 @@ const ProductList = () => {
           ) : (
             <div className="space-y-4">
               {products.map((p) => (
-                <div key={p.id} className="flex gap-6 border border-gray-100 rounded-lg overflow-hidden group hover:shadow-md transition-shadow p-2">
-                  <Link to={`/products/${p.id}`} className="w-[220px] h-[220px] flex-shrink-0 overflow-hidden bg-white flex items-center justify-center p-3">
+                <div key={p.id} className="flex flex-col sm:flex-row gap-4 sm:gap-6 border border-gray-100 rounded-lg overflow-hidden group hover:shadow-md transition-shadow p-2">
+                  <Link to={`/products/${p.id}`} className="w-full sm:w-[220px] sm:h-[220px] h-[180px] flex-shrink-0 overflow-hidden bg-white flex items-center justify-center p-3">
                     <img
                       src={p.imageUrl}
                       onError={(e) => { e.target.src = '/images/products/placeholder.png'; }}

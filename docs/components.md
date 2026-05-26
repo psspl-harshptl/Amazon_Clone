@@ -246,3 +246,117 @@ Color map:
 │ [Buy Again]  [View item]           │
 └─────────────────────────────────────┘
 ```
+
+---
+
+# Seller Components
+
+> Seller components are used only within `/seller/*` pages. They do not import buyer contexts (CartContext).
+
+---
+
+## `SellerNavbar.jsx`
+Top bar for all seller pages.
+
+**Structure:**
+```
+Row 1 (bg #131921):
+  [AmazonClone Seller Central logo]   [Hello, SellerName]   [Sign Out]
+```
+
+**Props:** none (reads from AuthContext)  
+**On Sign Out:** clears token, redirects to `/seller/login`
+
+---
+
+## `ListingForm.jsx`
+Reusable form for creating and editing product listings. Used by both `CreateListing.jsx` and `EditListing.jsx`.
+
+**Props:**
+| Prop | Type | Description |
+|------|------|-------------|
+| initialValues | object \| null | Pre-filled data for edit mode; `null` for create |
+| onSubmit | fn | `(formData) => void` — called with validated form payload |
+| loading | bool | Disables submit button while request is in flight |
+
+**Fields:**
+| Field | Type | Validation |
+|-------|------|-----------|
+| name | text | required, min 3 chars |
+| description | textarea | required |
+| price | number | required, > 0 |
+| mrp | number | optional, must be ≥ price |
+| stock | number | required, ≥ 0 |
+| categoryId | select | required |
+| imageUrl | text (URL) | required |
+| images | multi-input (URLs) | optional, up to 5 |
+
+---
+
+## `StatusBadge.jsx`
+Pill badge showing product or seller approval status.
+
+**Props:**
+| Prop | Type | Description |
+|------|------|-------------|
+| status | `'pending'` \| `'approved'` \| `'rejected'` | Status value |
+
+**Color map:**
+- `pending` → `bg-yellow-100 text-yellow-800`
+- `approved` → `bg-green-100 text-green-800`
+- `rejected` → `bg-red-100 text-red-800`
+
+---
+
+# Admin Components
+
+> Admin components are used only within `/admin/*` pages.
+
+---
+
+## `AdminSidebar.jsx`
+Left sidebar navigation for all admin pages.
+
+**Structure:**
+```
+┌────────────────┐
+│ AmazonClone    │
+│ Admin          │
+├────────────────┤
+│ 📊 Dashboard   │  → /admin/dashboard
+│ 📦 Products    │  → /admin/products
+│ 👤 Sellers     │  → /admin/sellers
+├────────────────┤
+│ [Sign Out]     │
+└────────────────┘
+```
+
+**Active link:** highlighted with `bg-[#232F3E]` left border `4px solid #FF9900`.  
+**Props:** none (reads from AuthContext + React Router location)
+
+---
+
+## `RejectModal.jsx`
+Shared modal for product and seller rejection flows.
+
+**Props:**
+| Prop | Type | Description |
+|------|------|-------------|
+| isOpen | bool | Controls visibility |
+| onClose | fn | Called on cancel / outside click |
+| onConfirm | fn | `(reason: string) => void` — called with rejection reason |
+| required | bool | If `true`, disables confirm until reason is non-empty (product rejection); if `false`, reason is optional (seller rejection) |
+| title | string | Modal heading, e.g. "Reject Product" |
+
+**Design:**
+```
+┌─────────────────────────────┐
+│ Reject Product              │ ← title
+│ ─────────────────────────── │
+│ Reason for rejection:       │
+│ ┌─────────────────────────┐ │
+│ │ textarea (3 rows)       │ │
+│ └─────────────────────────┘ │
+│ [Cancel]        [Confirm]   │ ← Confirm disabled if required + empty
+└─────────────────────────────┘
+```

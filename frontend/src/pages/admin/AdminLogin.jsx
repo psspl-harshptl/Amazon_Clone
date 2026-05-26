@@ -55,14 +55,14 @@ export default function AdminLogin() {
             <label className="block text-[13px] font-bold mb-1 text-[#0F1111]">Email or mobile phone number</label>
             <input
               type="email" value={email} onChange={e => setEmail(e.target.value)} required
-              className="w-full px-3 py-1.5 border border-gray-400 rounded focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600] outline-none text-[13px]"
+              className="w-full px-3 py-1.5 border border-gray-400 rounded focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600] outline-none"
             />
           </div>
           <div>
             <label className="block text-[13px] font-bold mb-1 text-[#0F1111]">Password</label>
             <input
               type="password" value={password} onChange={e => setPassword(e.target.value)} required
-              className="w-full px-3 py-1.5 border border-gray-400 rounded focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600] outline-none text-[13px]"
+              className="w-full px-3 py-1.5 border border-gray-400 rounded focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600] outline-none"
             />
           </div>
           <button

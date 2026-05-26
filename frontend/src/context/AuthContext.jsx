@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import api from '../api/axios';
 
 const AuthContext = createContext();
 
@@ -14,7 +15,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Load user from localStorage on mount
+  // Validate JWT server-side on mount via /auth/me
   useEffect(() => {
     const token = sessionStorage.getItem('amazon_token');
     if (!token) {

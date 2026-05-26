@@ -42,12 +42,22 @@ function ScrollToTop() {
   return null;
 }
 
-// Redirects admin/seller away from buyer pages
+// Redirects admin/seller away from buyer pages; guests are allowed
 function BuyerRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return null;
   if (user?.role === 'super_admin') return <Navigate to="/admin/dashboard" replace />;
   if (user?.role === 'seller') return <Navigate to="/seller/dashboard" replace />;
+  return children;
+}
+
+// Requires login; also redirects admin/seller away
+function PrivateRoute({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role === 'super_admin') return <Navigate to="/admin/dashboard" replace />;
+  if (user.role === 'seller') return <Navigate to="/seller/dashboard" replace />;
   return children;
 }
 
@@ -89,11 +99,11 @@ function AppContent() {
           {/* Buyer — buyer-only pages (admin/seller are redirected away) */}
           <Route path="/"                     element={<BuyerRoute><Home /></BuyerRoute>} />
           <Route path="/cart"                 element={<BuyerRoute><Cart /></BuyerRoute>} />
-          <Route path="/checkout"             element={<BuyerRoute><Checkout /></BuyerRoute>} />
-          <Route path="/orders"               element={<BuyerRoute><OrderHistory /></BuyerRoute>} />
-          <Route path="/orders/:id"           element={<BuyerRoute><OrderDetail /></BuyerRoute>} />
-          <Route path="/orders/:id/success"   element={<BuyerRoute><OrderSuccess /></BuyerRoute>} />
-          <Route path="/profile"              element={<BuyerRoute><Profile /></BuyerRoute>} />
+          <Route path="/checkout"             element={<PrivateRoute><Checkout /></PrivateRoute>} />
+          <Route path="/orders"               element={<PrivateRoute><OrderHistory /></PrivateRoute>} />
+          <Route path="/orders/:id"           element={<PrivateRoute><OrderDetail /></PrivateRoute>} />
+          <Route path="/orders/:id/success"   element={<PrivateRoute><OrderSuccess /></PrivateRoute>} />
+          <Route path="/profile"              element={<PrivateRoute><Profile /></PrivateRoute>} />
 
           {/* Seller */}
           <Route path="/seller/login"         element={<SellerLogin />} />

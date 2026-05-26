@@ -1,6 +1,6 @@
-# AmazonClone — Buyer Module
+# AmazonClone — Full-Stack eCommerce Platform
 
-A full-stack Amazon-like eCommerce application (Buyer Module only).  
+A full-stack Amazon-like eCommerce application with Buyer, Seller, and Super Admin modules.  
 Built with React, Node.js, Express, PostgreSQL, and Sequelize.
 
 ---
@@ -23,7 +23,7 @@ amazonclone/
 │   ├── services/          # Business logic
 │   ├── models/            # Sequelize models
 │   ├── routes/            # Route definitions
-│   ├── middlewares/       # Auth, error handling
+│   ├── middlewares/       # Auth, role checks, error handling
 │   ├── migrations/        # DB migrations
 │   ├── seeders/           # Sample data
 │   └── tests/             # Jest + supertest integration tests
@@ -32,7 +32,9 @@ amazonclone/
 │       ├── api/           # Axios instance
 │       ├── components/    # Reusable UI components
 │       ├── context/       # AuthContext, CartContext
-│       ├── pages/         # Route-level page components
+│       ├── pages/
+│       │   ├── admin/     # Admin module pages
+│       │   └── seller/    # Seller module pages
 │       └── hooks/         # Custom hooks
 ├── docs/                  # Architecture, API reference, design docs
 ├── CLAUDE.md
@@ -45,7 +47,7 @@ amazonclone/
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/yourname/amazonclone.git
+git clone https://github.com/psspl-harshptl/Amazon_Clone.git
 cd amazonclone
 ```
 
@@ -105,9 +107,13 @@ npm run dev
 
 ## Test Credentials (after seeding)
 
-| Role | Email | Password |
-|------|-------|----------|
-| Buyer | buyer@test.com | Test@1234 |
+| Role | Email | Password | Access |
+|------|-------|----------|--------|
+| Buyer | buyer@test.com | Test@1234 | `/` — browse, cart, orders |
+| Seller | seller@test.com | Test@1234 | `/seller/dashboard` — manage listings |
+| Super Admin | admin@test.com | Test@1234 | `/admin/dashboard` — approve sellers & products |
+
+> The super admin account is created via seeder — do not register via the public form.
 
 ---
 
@@ -134,38 +140,44 @@ npm run dev
 
 ## Features Implemented
 
-### Authentication
-- [x] Register with email, name, phone
-- [x] Login with JWT
+### Buyer Module
+- [x] Register / Login with JWT
 - [x] Protected routes (frontend + backend)
-- [x] Persistent session via localStorage
-
-### Products
-- [x] Product listing with pagination
-- [x] Search by keyword
-- [x] Filter by category, price, rating, discount
+- [x] Server-side JWT validation on app mount
+- [x] 401 auto-logout on expired/tampered token
+- [x] Product listing with pagination, search, filters
 - [x] Product detail with image gallery
-- [x] Product specifications and reviews
+- [x] Cart (add, update quantity, remove, clear)
+- [x] Checkout with shipping address
+- [x] Order placement via DB transaction (price integrity enforced server-side)
+- [x] Order history and detail view
+- [x] Recently viewed products
 
-### Cart
-- [x] Add to cart (API-backed for logged-in users, localStorage for guests)
-- [x] Update quantity (syncs to backend in real time)
-- [x] Remove item
-- [x] Clear cart
-- [x] Real-time cart count badge
-- [x] Guest cart auto-synced to backend on login
+### Seller Module
+- [x] Seller registration (account starts as `pending`, requires admin approval)
+- [x] Seller login (blocked until approved)
+- [x] Dashboard with listing stats (total, pending, approved, rejected)
+- [x] Create / edit / delete own product listings
+- [x] Product status visibility (pending/approved/rejected with rejection reason)
+- [x] Multi-image upload support
 
-### Orders
-- [x] Place order with shipping address (DB transaction, copies price at purchase)
-- [x] Online payment via Razorpay (card, UPI, netbanking)
-- [x] Cash on Delivery
-- [x] Order history (real API data only)
-- [x] Order detail view
-- [x] Order success confirmation page
+### Super Admin Module
+- [x] Admin login (super_admin role only)
+- [x] Dashboard with platform-wide stats (products + sellers by status)
+- [x] Top viewed products analytics
+- [x] Product approval / rejection (with rejection reason)
+- [x] Seller approval / rejection (with optional rejection reason)
+- [x] Full product management (edit, delete any product)
 
-### Recently Viewed
-- [x] Tracks viewed products (API for logged-in users, localStorage for guests)
-- [x] Displayed on Home page
+---
+
+## Roles & Access
+
+| Role | Registration | Login Redirect | Capabilities |
+|------|--------------|----------------|--------------|
+| `buyer` | `/register` | `/` | Browse products, cart, orders |
+| `seller` | `/seller/register` (pending → admin approves) | `/seller/dashboard` | Manage own listings |
+| `super_admin` | Seeded in DB | `/admin/dashboard` | Approve sellers & products, platform analytics |
 
 ---
 
@@ -196,12 +208,12 @@ See `docs/api.md` for the complete endpoint reference with request/response exam
 ## Git Commit Convention
 
 ```
-feat: add cart API endpoints
+feat: add seller dashboard API
 fix: resolve JWT expiry handling
 refactor: extract order logic to service layer
-chore: add migration for order_items table
+chore: add migration for seller fields
 style: fix product card hover animation
-docs: update README setup instructions
+docs: update README with seller module
 ```
 
 ---
@@ -226,6 +238,8 @@ docs: update README setup instructions
 - Passwords hashed with bcrypt (saltRounds: 12)
 - JWT stored in localStorage (httpOnly cookie recommended for production)
 - All private routes protected on both frontend and backend
+- Role-based access control: `requireRole` and `requireApprovedSeller` middleware
+- `priceAtPurchase` fetched from DB server-side — client cannot manipulate order price
 - No secrets committed — use `.env` only
 - Stack traces hidden in production responses
 

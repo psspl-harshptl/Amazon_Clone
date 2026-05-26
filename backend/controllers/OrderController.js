@@ -7,13 +7,31 @@ class OrderController {
       const { items, totalAmount, shippingAddress, paymentMethod, paymentId } = req.body;
       const userId = req.user.id;
 
+      // Fetch current prices from DB to prevent client-side price tampering
+      const productIds = items.map(i => i.productId);
+      const dbProducts = await Product.findAll({ where: { id: productIds }, transaction: t });
+      const priceMap = Object.fromEntries(dbProducts.map(p => [p.id, parseFloat(p.price)]));
+
+      // Validate all products exist
+      for (const item of items) {
+        if (priceMap[item.productId] === undefined) {
+          throw new Error(`Product ${item.productId} not found`);
+        }
+      }
+
+      // Recalculate total server-side
+      const shipping = 40;
+      const itemsTotal = items.reduce((sum, item) => sum + priceMap[item.productId] * item.quantity, 0);
+      const tax = Math.round(itemsTotal * 0.18);
+      const serverTotal = itemsTotal + shipping + tax;
+
       const order = await Order.create({
         userId,
-        totalAmount,
+        totalAmount: serverTotal,
         shippingAddress,
         paymentMethod,
         paymentId,
-        status: 'confirmed'
+        status: 'pending'
       }, { transaction: t });
 
       await Promise.all(items.map(item =>
@@ -21,7 +39,7 @@ class OrderController {
           orderId: order.id,
           productId: item.productId,
           quantity: item.quantity,
-          priceAtPurchase: item.price
+          priceAtPurchase: priceMap[item.productId]
         }, { transaction: t })
       ));
 
