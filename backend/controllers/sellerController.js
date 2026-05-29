@@ -45,6 +45,15 @@ class SellerController {
       res.status(400).json({ success: false, message: error.message });
     }
   }
+
+  async requestCategory(req, res) {
+    try {
+      const request = await SellerService.requestCategory(req.user.id, req.body.name);
+      res.status(201).json({ success: true, data: request, message: 'Category request submitted' });
+    } catch (error) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
 }
 
 module.exports = new SellerController();

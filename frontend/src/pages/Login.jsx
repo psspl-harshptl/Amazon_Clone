@@ -23,7 +23,7 @@ const Login = () => {
 
       if (res.data.success) {
         const { user, token } = res.data;
-        localStorage.setItem('amazon_token', token);
+        sessionStorage.setItem('amazon_token', token);
         login(user);
         if (user.role === 'super_admin') navigate('/admin/dashboard');
         else if (user.role === 'seller') navigate('/seller/dashboard');

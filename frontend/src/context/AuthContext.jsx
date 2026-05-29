@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
 
   // Validate JWT server-side on mount via /auth/me
   useEffect(() => {
-    const token = localStorage.getItem('amazon_token');
+    const token = sessionStorage.getItem('amazon_token');
     if (!token) {
       setLoading(false);
       return;
@@ -26,10 +26,10 @@ export const AuthProvider = ({ children }) => {
       .then(res => {
         if (res.data.success && res.data.data) {
           setUser(res.data.data);
-          localStorage.setItem('amazon_user', JSON.stringify(res.data.data));
+          sessionStorage.setItem('amazon_user', JSON.stringify(res.data.data));
         } else {
-          localStorage.removeItem('amazon_token');
-          localStorage.removeItem('amazon_user');
+          sessionStorage.removeItem('amazon_token');
+          sessionStorage.removeItem('amazon_user');
         }
       })
       .catch(() => {
@@ -41,13 +41,13 @@ export const AuthProvider = ({ children }) => {
 
   const login = (userData) => {
     setUser(userData);
-    localStorage.setItem('amazon_user', JSON.stringify(userData));
+    sessionStorage.setItem('amazon_user', JSON.stringify(userData));
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('amazon_user');
-    localStorage.removeItem('amazon_token');
+    sessionStorage.removeItem('amazon_user');
+    sessionStorage.removeItem('amazon_token');
     window.location.href = '/';
   };
 

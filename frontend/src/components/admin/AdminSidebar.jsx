@@ -2,9 +2,13 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 const NAV = [
-  { to: '/admin/dashboard', label: 'Dashboard', icon: '▤' },
-  { to: '/admin/products',  label: 'Products',  icon: '📦' },
-  { to: '/admin/sellers',   label: 'Sellers',   icon: '🏪' },
+  { to: '/admin/dashboard',   label: 'Dashboard',   icon: '▤' },
+  { to: '/admin/orders',      label: 'Orders',      icon: '🚚' },
+  { to: '/admin/products',    label: 'Products',    icon: '📦' },
+  { to: '/admin/sellers',     label: 'Sellers',     icon: '🏪' },
+  { to: '/admin/buyers',      label: 'Buyers',      icon: '👤' },
+  { to: '/admin/categories',  label: 'Categories',  icon: '🏷' },
+  { to: '/admin/payouts',     label: 'Payout Requests', icon: '💰' },
 ];
 
 export default function AdminSidebar() {

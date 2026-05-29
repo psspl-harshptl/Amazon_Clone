@@ -102,6 +102,8 @@ const ProductList = () => {
       if (key === 'rating') active.push({ key, value, label: `${value} & Up` });
       if (key === 'minPrice') active.push({ key, value, label: `From ₹${value}` });
       if (key === 'maxPrice') active.push({ key, value, label: `Up to ₹${value}` });
+      if (key === 'sort' && (value === 'newest' || value === 'oldest'))
+        active.push({ key, value, label: value === 'newest' ? 'Newest Arrivals' : 'Oldest First' });
     });
     return active;
   };
@@ -160,9 +162,22 @@ const ProductList = () => {
                   if (p.min) handleFilter('minPrice', p.min);
                   if (p.max) handleFilter('maxPrice', p.max);
                 }}
-                  className={`text-sm cursor-pointer py-1 px-1 rounded-md transition-colors 
+                  className={`text-sm cursor-pointer py-1 px-1 rounded-md transition-colors
                   ${(searchParams.get('minPrice') == p.min && searchParams.get('maxPrice') == p.max) ? 'bg-orange-50 font-bold text-[#C7511F]' : 'hover:text-[#C7511F]'}`}>
                   {p.label}
+                </div>
+              ))}
+            </SidebarSection>
+
+            <SidebarSection title="Date Listed">
+              {[
+                { label: 'Newest Arrivals', value: 'newest' },
+                { label: 'Oldest First', value: 'oldest' },
+              ].map((s) => (
+                <div key={s.value} onClick={() => handleFilter('sort', s.value)}
+                  className={`text-sm cursor-pointer py-1 px-1 rounded-md transition-colors
+                  ${searchParams.get('sort') === s.value ? 'bg-orange-50 font-bold text-[#C7511F]' : 'hover:text-[#C7511F]'}`}>
+                  {s.label}
                 </div>
               ))}
             </SidebarSection>

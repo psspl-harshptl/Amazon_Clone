@@ -242,7 +242,7 @@ export default function Navbar() {
       {/* ══ SECONDARY NAV ══ */}
       <div className="bg-[#232F3E] text-white flex items-center h-[38px] px-2 overflow-x-auto whitespace-nowrap text-[13px] no-scrollbar">
         <Link to="/products" className="border border-transparent hover:border-white flex items-center gap-1 px-2 py-1 cursor-pointer font-bold flex-shrink-0">
-          <div
+          {/* <div
             className="w-[17px] h-[14px]"
             style={{
               backgroundImage: 'url("/nav-sprite.png")',
@@ -250,11 +250,8 @@ export default function Navbar() {
               backgroundRepeat: 'no-repeat',
               backgroundSize: '350px 450px',
             }}
-          />
-          <span>All</span>
-        </Link>
-        <Link to="/seller/register" className="border border-transparent hover:border-white px-2 py-1 cursor-pointer flex-shrink-0 font-bold text-[#FF9900]">
-          Sell on Amazon
+          /> */}
+          <span>All Product</span>
         </Link>
         {categories.length > 0
           ? categories.map(cat => (
@@ -276,6 +273,9 @@ export default function Navbar() {
               </Link>
             ))
         }
+        <Link to="/seller/register" className="border border-transparent hover:border-white px-2 py-1 cursor-pointer flex-shrink-0 font-bold text-[#FF9900] ml-auto">
+          Sell on Amazon
+        </Link>
       </div>
     </header>
   );

@@ -14,6 +14,8 @@ import OrderHistory from './pages/OrderHistory';
 import OrderDetail from './pages/OrderDetail';
 import OrderSuccess from './pages/OrderSuccess';
 import Profile from './pages/Profile';
+import Addresses from './pages/Addresses';
+import Wishlist from './pages/Wishlist';
 
 // Seller pages
 import SellerLogin from './pages/seller/SellerLogin';
@@ -22,12 +24,25 @@ import SellerDashboard from './pages/seller/SellerDashboard';
 import MyListings from './pages/seller/MyListings';
 import CreateListing from './pages/seller/CreateListing';
 import EditListing from './pages/seller/EditListing';
+import SellerOrders from './pages/seller/SellerOrders';
+import SellerFinancials from './pages/seller/SellerFinancials';
+import StorefrontSettings from './pages/seller/StorefrontSettings';
+import LinkBankAccount from './pages/seller/LinkBankAccount';
+
+// Public storefront
+import Storefront from './pages/Storefront';
 
 // Admin pages
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminSellers from './pages/admin/AdminSellers';
+import AdminCategories from './pages/admin/AdminCategories';
+import AdminOrders from './pages/admin/AdminOrders';
+import AdminPayouts from './pages/admin/AdminPayouts';
+import AdminBuyers from './pages/admin/AdminBuyers';
+import AdminBuyerDetail from './pages/admin/AdminBuyerDetail';
+import AdminSellerDetail from './pages/admin/AdminSellerDetail';
 
 // Layout
 import Navbar from './components/common/Navbar';
@@ -59,11 +74,22 @@ function PrivateRoute({ children }) {
   return children;
 }
 
-function SellerRoute({ children }) {
+function SellerRoute({ children, bypassBankCheck, bypassStorefrontCheck }) {
   const { user, loading } = useAuth();
   if (loading) return null;
   if (!user || user.role !== 'seller') return <Navigate to="/seller/login" replace />;
   if (user.sellerStatus !== 'approved') return <Navigate to="/seller/login" replace />;
+
+  const hasBankDetails = user.bankDetails && user.bankDetails.accountNumber;
+  if (!hasBankDetails && !bypassBankCheck) {
+    return <Navigate to="/seller/bank-details" replace />;
+  }
+
+  const hasStorefront = user.storeName;
+  if (!hasStorefront && !bypassStorefrontCheck) {
+    return <Navigate to="/seller/storefront" replace />;
+  }
+
   return children;
 }
 
@@ -93,6 +119,7 @@ function AppContent() {
           <Route path="/products/:id"         element={<ProductDetail />} />
           <Route path="/login"                element={<Login />} />
           <Route path="/register"             element={<Register />} />
+          <Route path="/stores/:sellerId"     element={<Storefront />} />
 
           {/* Buyer — buyer-only pages (admin/seller are redirected away) */}
           <Route path="/"                     element={<BuyerRoute><Home /></BuyerRoute>} />
@@ -102,6 +129,8 @@ function AppContent() {
           <Route path="/orders/:id"           element={<PrivateRoute><OrderDetail /></PrivateRoute>} />
           <Route path="/orders/:id/success"   element={<PrivateRoute><OrderSuccess /></PrivateRoute>} />
           <Route path="/profile"              element={<PrivateRoute><Profile /></PrivateRoute>} />
+          <Route path="/addresses"            element={<PrivateRoute><Addresses /></PrivateRoute>} />
+          <Route path="/wishlist"             element={<PrivateRoute><Wishlist /></PrivateRoute>} />
 
           {/* Seller */}
           <Route path="/seller/login"         element={<SellerLogin />} />
@@ -110,12 +139,22 @@ function AppContent() {
           <Route path="/seller/listings"      element={<SellerRoute><MyListings /></SellerRoute>} />
           <Route path="/seller/listings/new"  element={<SellerRoute><CreateListing /></SellerRoute>} />
           <Route path="/seller/listings/:id/edit" element={<SellerRoute><EditListing /></SellerRoute>} />
+          <Route path="/seller/orders"        element={<SellerRoute><SellerOrders /></SellerRoute>} />
+          <Route path="/seller/financials"    element={<SellerRoute><SellerFinancials /></SellerRoute>} />
+          <Route path="/seller/storefront"    element={<SellerRoute bypassStorefrontCheck><StorefrontSettings /></SellerRoute>} />
+          <Route path="/seller/bank-details"  element={<SellerRoute bypassBankCheck bypassStorefrontCheck><LinkBankAccount /></SellerRoute>} />
 
           {/* Admin */}
           <Route path="/admin/login"          element={<AdminLogin />} />
           <Route path="/admin/dashboard"      element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           <Route path="/admin/products"       element={<AdminRoute><AdminProducts /></AdminRoute>} />
           <Route path="/admin/sellers"        element={<AdminRoute><AdminSellers /></AdminRoute>} />
+          <Route path="/admin/categories"     element={<AdminRoute><AdminCategories /></AdminRoute>} />
+          <Route path="/admin/orders"         element={<AdminRoute><AdminOrders /></AdminRoute>} />
+          <Route path="/admin/payouts"        element={<AdminRoute><AdminPayouts /></AdminRoute>} />
+          <Route path="/admin/buyers"         element={<AdminRoute><AdminBuyers /></AdminRoute>} />
+          <Route path="/admin/buyers/:id"     element={<AdminRoute><AdminBuyerDetail /></AdminRoute>} />
+          <Route path="/admin/sellers/:id"    element={<AdminRoute><AdminSellerDetail /></AdminRoute>} />
 
           <Route path="*"                     element={<Navigate to="/" replace />} />
         </Routes>

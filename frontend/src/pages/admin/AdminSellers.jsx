@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import StatusBadge from '../../components/common/StatusBadge';
@@ -13,6 +14,7 @@ export default function AdminSellers() {
   const [rejectModal, setRejectModal] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
   const [msg, setMsg] = useState('');
+  const navigate = useNavigate();
 
   const load = (statusFilter = tab) => {
     setLoading(true);
@@ -95,6 +97,7 @@ export default function AdminSellers() {
                     </td>
                     <td className="px-5 py-3">
                       <div className="flex gap-3">
+                        <button onClick={() => navigate(`/admin/sellers/${s.id}`)} className="text-[#0066C0] hover:underline font-medium">View</button>
                         {s.sellerStatus !== 'approved' && (
                           <button onClick={() => approve(s.id)} className="text-[#007600] hover:underline font-medium">Approve</button>
                         )}

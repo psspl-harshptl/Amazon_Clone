@@ -3,6 +3,25 @@
     "figma": {
       "type": "http",
       "url": "https://mcp.figma.com/mcp"
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp",
+        "--api-key",
+        "ctx7sk-ce3843b3-32cc-451b-a45f-29b3f835e293"
+      ],
+      "env": {}
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ],
+      "env": {}
     }
   }
 }

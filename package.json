@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/psspl-harshptl/Amazon_Clone/issues"
   },
-  "homepage": "https://github.com/psspl-harshptl/Amazon_Clone#readme"
+  "homepage": "https://github.com/psspl-harshptl/Amazon_Clone#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.60.0"
+  }
 }

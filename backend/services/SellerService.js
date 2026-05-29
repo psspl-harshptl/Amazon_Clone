@@ -1,4 +1,5 @@
-const { Product, ProductImage, Category } = require('../models');
+const { Product, ProductImage, ProductSpecification, Category, CategoryRequest } = require('../models');
+const { Op } = require('sequelize');
 
 function generateSlug(name) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now();
@@ -11,13 +12,14 @@ class SellerService {
       include: [
         { model: Category, as: 'category' },
         { model: ProductImage, as: 'galleryImages', attributes: ['id', 'url', 'isMain'] },
+        { model: ProductSpecification, as: 'specifications', attributes: ['id', 'key', 'value'] },
       ],
       order: [['createdAt', 'DESC']],
     });
   }
 
   async createProduct(sellerId, data) {
-    const { name, description, price, mrp, stock, categoryId, imageUrl, imageUrls, brand, discount_percent } = data;
+    const { name, description, price, mrp, stock, categoryId, imageUrl, imageUrls, brand, discount_percent, specifications } = data;
     const product = await Product.create({
       sellerId,
       name,
@@ -39,6 +41,15 @@ class SellerService {
       );
     }
 
+    if (specifications && specifications.length > 0) {
+      const validSpecs = specifications.filter(s => s.key?.trim() && s.value?.trim());
+      if (validSpecs.length > 0) {
+        await ProductSpecification.bulkCreate(
+          validSpecs.map(s => ({ productId: product.id, key: s.key.trim(), value: s.value.trim() }))
+        );
+      }
+    }
+
     return product;
   }
 
@@ -46,7 +57,7 @@ class SellerService {
     const product = await Product.findOne({ where: { id: productId, sellerId } });
     if (!product) throw new Error('Product not found or access denied');
 
-    const { name, description, price, mrp, stock, categoryId, imageUrl, imageUrls, brand, discount_percent } = data;
+    const { name, description, price, mrp, stock, categoryId, imageUrl, imageUrls, brand, discount_percent, specifications } = data;
     const updates = { description, price, mrp, stock, categoryId, imageUrl, brand, discount_percent };
     if (name && name !== product.name) {
       updates.name = name;
@@ -61,13 +72,33 @@ class SellerService {
       );
     }
 
-    return product.reload({ include: [{ model: Category, as: 'category' }] });
+    if (specifications !== undefined) {
+      await ProductSpecification.destroy({ where: { productId } });
+      const validSpecs = (specifications || []).filter(s => s.key?.trim() && s.value?.trim());
+      if (validSpecs.length > 0) {
+        await ProductSpecification.bulkCreate(
+          validSpecs.map(s => ({ productId, key: s.key.trim(), value: s.value.trim() }))
+        );
+      }
+    }
+
+    return product.reload({ include: [{ model: Category, as: 'category' }, { model: ProductSpecification, as: 'specifications' }] });
   }
 
   async deleteProduct(sellerId, productId) {
     const product = await Product.findOne({ where: { id: productId, sellerId } });
     if (!product) throw new Error('Product not found or access denied');
     await product.destroy();
+  }
+
+  async requestCategory(sellerId, name) {
+    const trimmed = (name || '').trim();
+    if (!trimmed) throw new Error('Category name is required');
+    const existing = await Category.findOne({ where: { name: { [Op.iLike]: trimmed } } });
+    if (existing) throw new Error('This category already exists — select it from the dropdown');
+    const dup = await CategoryRequest.findOne({ where: { name: { [Op.iLike]: trimmed }, status: 'pending' } });
+    if (dup) throw new Error('A pending request for this category already exists');
+    return CategoryRequest.create({ name: trimmed, sellerId, status: 'pending' });
   }
 
   async getDashboardStats(sellerId) {

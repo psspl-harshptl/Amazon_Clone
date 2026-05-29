@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import api from '../../api/axios';
+import RichTextEditor from '../common/RichTextEditor';
 
 const BASE = import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || 'http://localhost:5000';
 const MAX_IMAGES = 10;
@@ -22,11 +23,20 @@ const Input = (props) => (
 
 export default function ListingForm({ initial = {}, onSubmit, loading }) {
   const [categories, setCategories] = useState([]);
+  const [categoryRequestName, setCategoryRequestName] = useState('');
+  const [categoryRequestStatus, setCategoryRequestStatus] = useState(null); // null | 'submitting' | 'success' | 'error'
+  const [categoryRequestError, setCategoryRequestError] = useState('');
   const [form, setForm] = useState({
     name: '', description: '', price: '', mrp: '',
-    stock: '', categoryId: '', brand: '', discount_percent: '',
+    stock: '', categoryId: '', brand: '',
     ...initial,
   });
+
+  const [specs, setSpecs] = useState(
+    () => (initial.specifications?.length > 0)
+      ? initial.specifications.map(s => ({ key: s.key, value: s.value }))
+      : []
+  );
 
   // existing = URLs already on server; newFiles = {file, preview} not yet uploaded
   const [existingUrls, setExistingUrls] = useState(() => {
@@ -42,11 +52,56 @@ export default function ListingForm({ initial = {}, onSubmit, loading }) {
   const totalImages = existingUrls.length + newFiles.length;
   const canAddMore = totalImages < MAX_IMAGES;
 
-  useEffect(() => {
+  const fetchCategories = () =>
     api.get('/products/categories').then(r => setCategories(r.data.data || []));
-  }, []);
+
+  useEffect(() => { fetchCategories(); }, []);
+
+  const submitCategoryRequest = async () => {
+    if (!categoryRequestName.trim()) return;
+    setCategoryRequestStatus('submitting');
+    setCategoryRequestError('');
+    try {
+      await api.post('/seller/category-requests', { name: categoryRequestName.trim() });
+      setCategoryRequestStatus('success');
+      setCategoryRequestName('');
+      fetchCategories();
+    } catch (e) {
+      setCategoryRequestError(e.response?.data?.message || 'Request failed');
+      setCategoryRequestStatus('error');
+    }
+  };
+
+  const isOtherSelected = form.categoryId === 'other';
+
+  const handleCategoryChange = (e) => {
+    const val = e.target.value;
+    setForm(f => ({ ...f, categoryId: val }));
+    if (val !== 'other') {
+      setCategoryRequestStatus(null);
+      setCategoryRequestName('');
+    }
+  };
 
   const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
+
+  const addSpec    = () => setSpecs(s => [...s, { key: '', value: '' }]);
+  const removeSpec = (i) => setSpecs(s => s.filter((_, idx) => idx !== i));
+  const setSpec    = (i, field, val) => setSpecs(s => s.map((sp, idx) => idx === i ? { ...sp, [field]: val } : sp));
+
+  const discountPercent = (() => {
+    const p = parseFloat(form.price);
+    const m = parseFloat(form.mrp);
+    if (m > 0 && p > 0 && m > p) return Math.round(((m - p) / m) * 100);
+    return null;
+  })();
+
+  const savings = (() => {
+    const p = parseFloat(form.price);
+    const m = parseFloat(form.mrp);
+    if (m > 0 && p > 0 && m > p) return (m - p).toFixed(2);
+    return null;
+  })();
 
   const addFiles = (files) => {
     const imgs = Array.from(files).filter(f => f.type.startsWith('image/'));
@@ -80,7 +135,7 @@ export default function ListingForm({ initial = {}, onSubmit, loading }) {
     setError('');
     if (!form.name.trim()) return setError('Product name is required');
     if (!form.price || parseFloat(form.price) <= 0) return setError('Price must be greater than 0');
-    if (!form.categoryId) return setError('Category is required');
+    if (!form.categoryId || form.categoryId === 'other') return setError('Select a valid category. If yours is missing, submit a request above — you can list this product once it\'s approved.');
 
     let uploadedUrls = [];
     if (newFiles.length > 0) {
@@ -99,7 +154,13 @@ export default function ListingForm({ initial = {}, onSubmit, loading }) {
     }
 
     const imageUrls = [...existingUrls, ...uploadedUrls];
-    onSubmit({ ...form, imageUrl: imageUrls[0] || '', imageUrls });
+    onSubmit({
+      ...form,
+      imageUrl: imageUrls[0] || '',
+      imageUrls,
+      discount_percent: discountPercent ?? 0,
+      specifications: specs.filter(s => s.key.trim() && s.value.trim()),
+    });
   };
 
   const busy = loading || uploading;
@@ -201,12 +262,50 @@ export default function ListingForm({ initial = {}, onSubmit, loading }) {
         <Field label="Category" required>
           <select
             value={form.categoryId}
-            onChange={set('categoryId')}
+            onChange={handleCategoryChange}
             className="w-full border border-gray-400 rounded px-3 py-1.5 text-sm text-[#0F1111] focus:outline-none focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600] bg-white"
+            data-testid="category-select"
           >
             <option value="">Select category</option>
             {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            <option value="other">Other (Request new category)</option>
           </select>
+
+          {/* Request new category — shown only when Other is selected */}
+          {isOtherSelected && (
+            <div className="mt-2 p-3 border border-dashed border-[#e77600] rounded-lg bg-orange-50" data-testid="category-request-box">
+              <p className="text-[12px] text-[#565959] mb-1.5">
+                Request a new category —{' '}
+                <span className="font-medium text-[#0066c0]">admin will review and approve it.</span>
+                {' '}Once approved, select it from the dropdown to list your product.
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={categoryRequestName}
+                  onChange={e => { setCategoryRequestName(e.target.value); setCategoryRequestStatus(null); }}
+                  placeholder="e.g. Sports Equipment"
+                  data-testid="category-request-input"
+                  className="flex-1 border border-gray-400 rounded px-2 py-1 text-sm text-[#0F1111] focus:outline-none focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600]"
+                />
+                <button
+                  type="button"
+                  onClick={submitCategoryRequest}
+                  disabled={!categoryRequestName.trim() || categoryRequestStatus === 'submitting'}
+                  data-testid="category-request-submit"
+                  className="px-3 py-1 bg-[#232F3E] hover:bg-[#374151] text-white text-xs rounded disabled:opacity-50 transition-colors whitespace-nowrap"
+                >
+                  {categoryRequestStatus === 'submitting' ? 'Sending…' : 'Send Request'}
+                </button>
+              </div>
+              {categoryRequestStatus === 'success' && (
+                <p className="text-[12px] text-green-700 mt-1.5" data-testid="category-request-success">Request submitted — you'll be able to select it once approved.</p>
+              )}
+              {categoryRequestStatus === 'error' && (
+                <p className="text-[12px] text-[#CC0C39] mt-1.5" data-testid="category-request-error">{categoryRequestError}</p>
+              )}
+            </div>
+          )}
         </Field>
 
         <Field label="Brand">
@@ -225,20 +324,95 @@ export default function ListingForm({ initial = {}, onSubmit, loading }) {
           <Input type="number" min="0" value={form.stock} onChange={set('stock')} placeholder="0" />
         </Field>
 
-        <Field label="Discount (%)">
-          <Input type="number" min="0" max="100" value={form.discount_percent} onChange={set('discount_percent')} placeholder="0" />
+        <Field label="Discount">
+          {discountPercent !== null ? (
+            <div
+              className="flex items-center justify-between px-3 py-2 border border-green-300 rounded bg-green-50"
+              data-testid="discount-display"
+            >
+              <span className="text-sm font-bold text-green-700">{discountPercent}% off</span>
+              <span className="text-xs text-green-600">Save ₹{savings}</span>
+            </div>
+          ) : (
+            <div className="px-3 py-1.5 border border-gray-200 rounded bg-gray-50 text-sm text-gray-400 italic">
+              Auto-calculated from Price &amp; MRP
+            </div>
+          )}
         </Field>
       </div>
 
       <Field label="Description">
-        <textarea
+        <RichTextEditor
           value={form.description}
-          onChange={set('description')}
-          rows={4}
-          placeholder="Describe your product…"
-          className="w-full border border-gray-400 rounded px-3 py-1.5 text-sm text-[#0F1111] focus:outline-none focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600] resize-none"
+          onChange={(html) => setForm(f => ({ ...f, description: html }))}
         />
       </Field>
+
+      {/* Specifications */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-[13px] font-bold text-[#0F1111]">
+            Specifications <span className="text-[#565959] font-normal">(optional)</span>
+          </label>
+          <button
+            type="button"
+            onClick={addSpec}
+            className="flex items-center gap-1 text-xs text-[#0066c0] hover:text-[#c45500] hover:underline"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Add row
+          </button>
+        </div>
+
+        {specs.length === 0 ? (
+          <button
+            type="button"
+            onClick={addSpec}
+            className="w-full border-2 border-dashed border-gray-300 hover:border-[#e77600] rounded-lg py-4 text-sm text-gray-400 hover:text-[#e77600] transition-colors"
+          >
+            + Add specifications (Color, Size, Material…)
+          </button>
+        ) : (
+          <div className="border border-gray-200 rounded-lg overflow-hidden">
+            {/* Header */}
+            <div className="grid grid-cols-[1fr_1fr_32px] bg-gray-50 border-b border-gray-200 px-3 py-1.5 text-[11px] font-bold text-[#565959] uppercase tracking-wide">
+              <span>Attribute</span>
+              <span>Value</span>
+              <span />
+            </div>
+
+            {specs.map((spec, i) => (
+              <div key={i} className="grid grid-cols-[1fr_1fr_32px] items-center border-b border-gray-100 last:border-0 px-3 py-2 gap-2">
+                <input
+                  type="text"
+                  value={spec.key}
+                  onChange={e => setSpec(i, 'key', e.target.value)}
+                  placeholder="e.g. Color"
+                  className="border border-gray-300 rounded px-2 py-1 text-sm text-[#0F1111] focus:outline-none focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600]"
+                />
+                <input
+                  type="text"
+                  value={spec.value}
+                  onChange={e => setSpec(i, 'value', e.target.value)}
+                  placeholder="e.g. Blue"
+                  className="border border-gray-300 rounded px-2 py-1 text-sm text-[#0F1111] focus:outline-none focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600]"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeSpec(i)}
+                  className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-[#CC0C39] hover:bg-red-50 rounded transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <button
         type="submit"

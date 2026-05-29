@@ -23,7 +23,7 @@ export default function SellerLogin() {
           setError('This portal is for sellers only.');
           return;
         }
-        localStorage.setItem('amazon_token', token);
+        sessionStorage.setItem('amazon_token', token);
         login(user);
         navigate('/seller/dashboard');
       }

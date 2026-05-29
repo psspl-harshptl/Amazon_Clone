@@ -9,6 +9,7 @@ const recentlyViewedRoutes = require('./recentlyViewed.routes');
 const sellerRoutes = require('./seller.routes');
 const adminRoutes = require('./admin.routes');
 const uploadRoutes = require('./upload.routes');
+const reviewRoutes = require('./review.routes');
 
 router.use('/auth', authRoutes);
 router.use('/products', productRoutes);
@@ -19,5 +20,6 @@ router.use('/recently-viewed', recentlyViewedRoutes);
 router.use('/seller', sellerRoutes);
 router.use('/admin', adminRoutes);
 router.use('/upload', uploadRoutes);
+router.use('/reviews', reviewRoutes);
 
 module.exports = router;

@@ -168,7 +168,10 @@ const OrderCard = ({ order }) => {
                   <button className="w-full bg-white hover:bg-gray-50 text-[13px] text-[#0F1111] border border-[#d5d9d9] rounded-lg py-1.5 shadow-sm transition-colors">
                     Return items
                   </button>
-                  <button className="w-full bg-white hover:bg-gray-50 text-[13px] text-[#0F1111] border border-[#d5d9d9] rounded-lg py-1.5 shadow-sm transition-colors">
+                  <button
+                    onClick={() => item.product?.id && navigate(`/products/${item.product.id}?tab=reviews`)}
+                    className="w-full bg-white hover:bg-gray-50 text-[13px] text-[#0F1111] border border-[#d5d9d9] rounded-lg py-1.5 shadow-sm transition-colors"
+                  >
                     Write a product review
                   </button>
                 </>
@@ -193,6 +196,7 @@ export default function OrderHistory() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('orders');
   const [searchQuery, setSearchQuery] = useState('');
+  const [timePeriod, setTimePeriod] = useState('past 3 months');
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -211,14 +215,29 @@ export default function OrderHistory() {
     fetchOrders();
   }, [user]);
 
-  // Filter by search
+  const now = new Date();
+
+  const periodFiltered = realOrders.filter((o) => {
+    const created = new Date(o.createdAt);
+    if (timePeriod === 'past 3 months') return (now - created) <= 90 * 24 * 60 * 60 * 1000;
+    if (timePeriod === 'past 6 months') return (now - created) <= 180 * 24 * 60 * 60 * 1000;
+    return created.getFullYear() === parseInt(timePeriod);
+  });
+
+  const tabFiltered = periodFiltered.filter((o) => {
+    if (activeTab === 'buy-again')    return o.status === 'delivered';
+    if (activeTab === 'not-shipped')  return o.status === 'pending' || o.status === 'confirmed';
+    if (activeTab === 'cancelled')    return o.status === 'cancelled';
+    return true;
+  });
+
   const filteredOrders = searchQuery
-    ? realOrders.filter((o) =>
+    ? tabFiltered.filter((o) =>
         o.items.some((item) =>
           item.product?.name?.toLowerCase().includes(searchQuery.toLowerCase())
         )
       )
-    : realOrders;
+    : tabFiltered;
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-[#EAEDED]">
@@ -254,10 +273,10 @@ export default function OrderHistory() {
   );
 
   const tabs = [
-    { key: 'orders', label: 'Orders' },
-    { key: 'buy-again', label: 'Buy Again' },
-    { key: 'not-shipped', label: 'Not Yet Shipped' },
-    { key: 'cancelled', label: 'Cancelled Orders' },
+    { key: 'orders',      label: 'Orders',            count: periodFiltered.length },
+    { key: 'buy-again',   label: 'Buy Again',          count: periodFiltered.filter(o => o.status === 'delivered').length },
+    { key: 'not-shipped', label: 'Not Yet Shipped',    count: periodFiltered.filter(o => o.status === 'pending' || o.status === 'confirmed').length },
+    { key: 'cancelled',   label: 'Cancelled Orders',   count: periodFiltered.filter(o => o.status === 'cancelled').length },
   ];
 
   return (
@@ -302,7 +321,7 @@ export default function OrderHistory() {
                     : 'border-transparent text-[#0F1111] hover:text-[#C7511F]'
                 }`}
               >
-                {t.label}
+                {t.label}{t.count > 0 && activeTab !== t.key && <span className="ml-1 text-[12px] text-gray-500">({t.count})</span>}
               </button>
             ))}
           </div>
@@ -312,7 +331,11 @@ export default function OrderHistory() {
         <div className="flex items-center gap-2 mb-5 text-[14px]">
           <span className="font-bold text-[#0F1111]">{filteredOrders.length} {filteredOrders.length === 1 ? 'order' : 'orders'}</span>
           <span className="text-[#0F1111]">placed in</span>
-          <select className="border border-[#888c8c] rounded-lg px-2 py-1 text-[13px] text-[#0F1111] bg-[#f0f2f2] cursor-pointer outline-none focus:ring-2 ring-[#e77600]">
+          <select
+            value={timePeriod}
+            onChange={(e) => setTimePeriod(e.target.value)}
+            className="border border-[#888c8c] rounded-lg px-2 py-1 text-[13px] text-[#0F1111] bg-[#f0f2f2] cursor-pointer outline-none focus:ring-2 ring-[#e77600]"
+          >
             <option>past 3 months</option>
             <option>past 6 months</option>
             <option>2026</option>

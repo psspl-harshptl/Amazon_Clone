@@ -10,7 +10,7 @@ const api = axios.create({
 // Add a request interceptor to include JWT token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('amazon_token');
+    const token = sessionStorage.getItem('amazon_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -27,9 +27,9 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Only redirect if we had a token (i.e. it expired/was tampered)
-      const hadToken = !!localStorage.getItem('amazon_token');
-      localStorage.removeItem('amazon_token');
-      localStorage.removeItem('amazon_user');
+      const hadToken = !!sessionStorage.getItem('amazon_token');
+      sessionStorage.removeItem('amazon_token');
+      sessionStorage.removeItem('amazon_user');
       if (hadToken && window.location.pathname !== '/login' && window.location.pathname !== '/register') {
         window.location.href = '/login';
       }
