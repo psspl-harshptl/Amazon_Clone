@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     status: {
-      type: DataTypes.ENUM('pending', 'confirmed', 'shipped', 'delivered', 'cancelled'),
+      type: DataTypes.ENUM('pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'return_pending', 'returned'),
       defaultValue: 'pending'
     },
     shippingAddress: {
@@ -27,7 +27,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     paymentMethod: DataTypes.STRING,
-    paymentId: DataTypes.STRING
+    paymentId: DataTypes.STRING,
+    returnReason: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    }
   }, {
     sequelize,
     modelName: 'Order',

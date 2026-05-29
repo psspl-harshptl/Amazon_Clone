@@ -25,8 +25,8 @@ module.exports = {
           slug: 'oneplus-12r-iron-gray',
           description: 'Smooth Beyond Belief. Snapdragon 8 Gen 2, 5500 mAh battery, 100W SUPERVOOC charging.',
           price: 39999.00, mrp: 42999.00, stock: 50,
-          imageUrl: '/images/products/placeholder.png',
-          images: ['/images/products/placeholder.png'],
+          imageUrl: '/images/products/smartphone.jpg',
+          images: ['/images/products/smartphone.jpg'],
           badge: 'Bestseller', rating: 4.5, reviewCount: 1245,
           createdAt: new Date(), updatedAt: new Date()
         },
@@ -36,8 +36,8 @@ module.exports = {
           slug: 'apple-iphone-15-blue',
           description: 'DYNAMIC ISLAND COMES TO IPHONE 15. 48MP MAIN CAMERA WITH 2X TELEPHOTO.',
           price: 72999.00, mrp: 79900.00, stock: 30,
-          imageUrl: '/images/products/placeholder.png',
-          images: ['/images/products/placeholder.png'],
+          imageUrl: '/images/products/smartphone.jpg',
+          images: ['/images/products/smartphone.jpg'],
           badge: "Amazon's Choice", rating: 4.7, reviewCount: 890,
           createdAt: new Date(), updatedAt: new Date()
         },
@@ -47,8 +47,8 @@ module.exports = {
           slug: 'mens-regular-fit-tshirt',
           description: '100% Cotton, Breathable fabric, perfect for summer.',
           price: 499.00, mrp: 999.00, stock: 100,
-          imageUrl: '/images/products/cosmetics.png',
-          images: ['/images/products/cosmetics.png'],
+          imageUrl: '/images/products/tshirt.jpg',
+          images: ['/images/products/tshirt.jpg'],
           badge: 'New Launch', rating: 4.0, reviewCount: 45,
           createdAt: new Date(), updatedAt: new Date()
         }

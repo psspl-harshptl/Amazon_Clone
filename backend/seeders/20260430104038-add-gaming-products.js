@@ -19,7 +19,7 @@ module.exports = {
           description: 'THX Spatial Audio - 50mm Drivers - Detachable Mic.',
           price: 15999.00, mrp: 19999.00, stock: 100,
           brand: 'Razer',
-          imageUrl: '/images/products/headphones.png',
+          imageUrl: '/images/products/headset.png',
           rating: 4.6, reviewCount: 15200, is_best_seller: true,
           createdAt: new Date(), updatedAt: new Date()
         },
@@ -30,7 +30,7 @@ module.exports = {
           description: 'HERO 25K Sensor, 25,600 DPI, RGB, Adjustable Weights.',
           price: 3995.00, mrp: 5495.00, stock: 300,
           brand: 'Logitech',
-          imageUrl: '/images/products/deskmat.png',
+          imageUrl: '/images/products/gaming-mouse.png',
           rating: 4.7, reviewCount: 45000, is_best_seller: true,
           createdAt: new Date(), updatedAt: new Date()
         },
@@ -41,7 +41,7 @@ module.exports = {
           description: 'CHERRY MX Blue Switches - RGB LED Backlit.',
           price: 12499.00, mrp: 15999.00, stock: 50,
           brand: 'Corsair',
-          imageUrl: '/images/products/deskmat.png',
+          imageUrl: '/images/products/gaming-keyboard.png',
           rating: 4.8, reviewCount: 8900, is_top_deal: true, discount_percent: 22,
           createdAt: new Date(), updatedAt: new Date()
         },
@@ -52,7 +52,7 @@ module.exports = {
           description: '20K DPI Optical Sensor - Fastest Gaming Mouse Switch.',
           price: 3499.00, mrp: 5999.00, stock: 200,
           brand: 'Razer',
-          imageUrl: '/images/products/deskmat.png',
+          imageUrl: '/images/products/gaming-mouse.png',
           rating: 4.5, reviewCount: 22000, is_top_deal: true, discount_percent: 42,
           createdAt: new Date(), updatedAt: new Date()
         },
@@ -63,7 +63,7 @@ module.exports = {
           description: 'Ultra-portable Tenkeyless Design, Detachable Micro USB Cable.',
           price: 9995.00, mrp: 11995.00, stock: 80,
           brand: 'Logitech',
-          imageUrl: '/images/products/deskmat.png',
+          imageUrl: '/images/products/gaming-keyboard.png',
           rating: 4.7, reviewCount: 12000,
           createdAt: new Date(), updatedAt: new Date()
         }

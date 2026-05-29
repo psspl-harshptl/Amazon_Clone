@@ -9,9 +9,11 @@ module.exports = (sequelize, DataTypes) => {
       Product.hasMany(models.ProductImage, { foreignKey: 'productId', as: 'galleryImages' });
       Product.hasMany(models.ProductSpecification, { foreignKey: 'productId', as: 'specifications' });
       Product.hasMany(models.ProductFeature, { foreignKey: 'productId', as: 'features' });
+      Product.hasMany(models.ProductVariant, { foreignKey: 'productId', as: 'variants' });
       Product.hasMany(models.CartItem, { foreignKey: 'productId' });
       Product.hasMany(models.OrderItem, { foreignKey: 'productId' });
       Product.hasMany(models.Review,    { foreignKey: 'productId', as: 'reviews' });
+      Product.hasMany(models.WishlistItem, { foreignKey: 'productId', as: 'wishlistItems' });
     }
   }
   Product.init({

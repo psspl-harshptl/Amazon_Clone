@@ -9,6 +9,9 @@ export default function MyListings() {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(null);
   const [msg, setMsg] = useState('');
+  const [csvFile, setCsvFile] = useState(null);
+  const [uploadingCsv, setUploadingCsv] = useState(false);
+  const [uploadLogs, setUploadLogs] = useState(null);
 
   const load = () => {
     setLoading(true);
@@ -34,6 +37,29 @@ export default function MyListings() {
     }
   };
 
+  const handleBulkUpload = async (e) => {
+    e.preventDefault();
+    if (!csvFile) return;
+    setUploadingCsv(true);
+    setUploadLogs(null);
+    const formData = new FormData();
+    formData.append('file', csvFile);
+
+    try {
+      const res = await api.post('/seller/products/bulk-upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setMsg(`Bulk upload completed! Success: ${res.data.data.successCount}, Failures: ${res.data.data.failureCount}`);
+      setUploadLogs(res.data.data.logs);
+      setCsvFile(null);
+      load();
+    } catch (err) {
+      setMsg(err.response?.data?.message || 'Bulk upload failed');
+    } finally {
+      setUploadingCsv(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#EAEDED]">
       <SellerNavbar />
@@ -47,6 +73,50 @@ export default function MyListings() {
             + Add Product
           </Link>
         </div>
+
+        {/* CSV Bulk Upload Area */}
+        <div className="bg-white border border-gray-200 rounded shadow-sm p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="space-y-0.5">
+            <h3 className="text-[14px] font-bold text-[#0F1111]">Bulk Upload Products via CSV</h3>
+            <p className="text-[12px] text-[#565959]">Columns required: <strong>name, description, price, mrp, stock, category, brand, image_url</strong></p>
+          </div>
+          <form onSubmit={handleBulkUpload} className="flex gap-2 items-center flex-wrap">
+            <input
+              type="file"
+              accept=".csv"
+              required
+              onChange={e => setCsvFile(e.target.files[0])}
+              className="text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-[#0F1111] hover:file:bg-gray-200 cursor-pointer"
+            />
+            <button
+              type="submit"
+              disabled={uploadingCsv || !csvFile}
+              className="bg-[#FF9900] hover:bg-[#e68a00] disabled:opacity-50 text-white text-[12px] font-semibold px-4 py-1.5 rounded shadow-sm transition-all cursor-pointer"
+            >
+              {uploadingCsv ? 'Uploading...' : 'Upload CSV'}
+            </button>
+          </form>
+        </div>
+
+        {/* Bulk Upload Status Logs */}
+        {uploadLogs && (
+          <div className="bg-white border border-gray-200 rounded shadow-sm p-4 space-y-2 max-h-60 overflow-y-auto">
+            <div className="flex justify-between items-center border-b pb-2">
+              <h4 className="text-[13px] font-bold text-[#0F1111]">CSV Import Logs</h4>
+              <button onClick={() => setUploadLogs(null)} className="text-[11px] text-[#007185] hover:underline">Close Logs</button>
+            </div>
+            <div className="space-y-1 text-[12px]">
+              {uploadLogs.map((log, i) => (
+                <div key={i} className={`flex items-start gap-2 ${log.status === 'success' ? 'text-green-700' : 'text-red-700'}`}>
+                  <span className="font-bold flex-shrink-0">Row {log.row}:</span>
+                  <span className="font-semibold flex-shrink-0">[{log.status.toUpperCase()}]</span>
+                  <span className="font-medium flex-shrink-0">{log.name}</span>
+                  <span>— {log.message}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {msg && (
           <div className="p-3 bg-[#DFF2BF] border border-[#4F8A10] text-[#4F8A10] text-[13px] rounded">

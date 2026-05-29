@@ -2,14 +2,16 @@ import { useEffect, useState } from 'react';
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import api from '../../api/axios';
 
-const STATUS_OPTIONS = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
+const STATUS_OPTIONS = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'return_pending', 'returned'];
 
 const STATUS_STYLE = {
-  pending:   'bg-blue-50   text-blue-700   border-blue-200',
-  confirmed: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-  shipped:   'bg-yellow-50 text-yellow-700 border-yellow-200',
-  delivered: 'bg-green-50  text-green-700  border-green-200',
-  cancelled: 'bg-red-50    text-red-600    border-red-200',
+  pending:        'bg-blue-50   text-blue-700   border-blue-200',
+  confirmed:      'bg-indigo-50 text-indigo-700 border-indigo-200',
+  shipped:        'bg-yellow-50 text-yellow-700 border-yellow-200',
+  delivered:      'bg-green-50  text-green-700  border-green-200',
+  cancelled:      'bg-red-50    text-red-600    border-red-200',
+  return_pending: 'bg-orange-50 text-orange-700 border-orange-200',
+  returned:       'bg-purple-50 text-purple-700 border-purple-200',
 };
 
 const fmtDate = (iso) => new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -137,16 +139,21 @@ export default function AdminOrders() {
                       <td className="px-4 py-3">
                         <select
                           value={order.status}
-                          disabled={updating === order.id || order.status === 'cancelled'}
+                          disabled={updating === order.id || ['cancelled', 'returned'].includes(order.status)}
                           onChange={e => handleStatusChange(order.id, e.target.value)}
                           className={`text-xs font-medium border rounded-full px-3 py-1 cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#e77600] disabled:cursor-not-allowed disabled:opacity-70 ${STATUS_STYLE[order.status]}`}
                         >
                           {STATUS_OPTIONS.map(s => (
                             <option key={s} value={s}>
-                              {s.charAt(0).toUpperCase() + s.slice(1)}
+                              {s === 'return_pending' ? 'Return Pending' : s.charAt(0).toUpperCase() + s.slice(1)}
                             </option>
                           ))}
                         </select>
+                        {order.returnReason && (
+                          <p className="text-[10px] text-gray-500 mt-1 max-w-[150px] truncate" title={order.returnReason}>
+                            Reason: "{order.returnReason}"
+                          </p>
+                        )}
                         {updating === order.id && (
                           <span className="ml-2 text-xs text-gray-400">Saving…</span>
                         )}

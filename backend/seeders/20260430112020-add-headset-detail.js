@@ -12,8 +12,8 @@ module.exports = {
       const productId = rows[0].id;
 
       await queryInterface.bulkInsert('ProductImages', [
-        { productId, url: '/images/products/headphones.png', isMain: true,  createdAt: new Date(), updatedAt: new Date() },
-        { productId, url: '/images/products/deskmat.png',    isMain: false, createdAt: new Date(), updatedAt: new Date() }
+        { productId, url: '/images/products/headset.png',  isMain: true,  createdAt: new Date(), updatedAt: new Date() },
+        { productId, url: '/images/products/headset.png',  isMain: false, createdAt: new Date(), updatedAt: new Date() }
       ], { transaction });
 
       await queryInterface.bulkInsert('ProductSpecifications', [

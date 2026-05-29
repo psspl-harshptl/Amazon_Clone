@@ -23,8 +23,8 @@ module.exports = {
           slug: 'pedigree-adult-dry-dog-food',
           description: 'Complete and balanced dog food. Contains 20% protein, 10% fat and 5% fiber.',
           price: 1250.00, mrp: 1400.00, stock: 200,
-          imageUrl: '/images/products/placeholder.png',
-          images: ['/images/products/placeholder.png'],
+          imageUrl: '/images/products/dog-food.jpg',
+          images: ['/images/products/dog-food.jpg'],
           badge: 'Bestseller', rating: 4.8, reviewCount: 3421,
           createdAt: new Date(), updatedAt: new Date()
         }

@@ -7,7 +7,7 @@ const CartItem = ({ item, onUpdateQty, onRemove }) => (
     <div className="w-[180px] h-[180px] bg-gray-50 flex-shrink-0 flex items-center justify-center p-4">
       <img src={item.imageUrl} alt={item.name} className="max-h-full max-w-full object-contain" />
     </div>
-    
+
     <div className="flex-grow space-y-1">
       <div className="flex justify-between items-start">
         <Link to={`/products/${item.id}`} className="text-[18px] font-medium text-[#0F1111] hover:text-[#007185] hover:underline line-clamp-2 leading-tight">
@@ -15,26 +15,29 @@ const CartItem = ({ item, onUpdateQty, onRemove }) => (
         </Link>
         <span className="text-[18px] font-bold text-[#0F1111]">₹{Number(item.price).toLocaleString('en-IN')}</span>
       </div>
-      
+
       <p className="text-[#007600] text-[12px] font-medium">In Stock</p>
       {item.brand && <p className="text-[12px] text-[#565959]">Brand: {item.brand}</p>}
-      
+      {item.variantLabel && (
+        <p className="text-[12px] text-[#565959] font-medium">{item.variantLabel}</p>
+      )}
+
       <div className="flex items-center gap-4 mt-4 h-8">
         <div className="flex items-center bg-[#F0F2F2] border border-[#D5D9D9] rounded-lg shadow-sm overflow-hidden">
-          <button 
-            onClick={() => onUpdateQty(item.id, -1)}
+          <button
+            onClick={() => onUpdateQty(item.itemId, -1)}
             className="px-3 py-1 hover:bg-[#E3E6E6] transition-colors font-bold border-r border-[#D5D9D9]"
           >-</button>
           <span className="px-4 text-[14px] font-medium">{item.quantity}</span>
-          <button 
-            onClick={() => onUpdateQty(item.id, 1)}
+          <button
+            onClick={() => onUpdateQty(item.itemId, 1)}
             className="px-3 py-1 hover:bg-[#E3E6E6] transition-colors font-bold border-l border-[#D5D9D9]"
           >+</button>
         </div>
-        
+
         <div className="flex items-center gap-3 text-[12px] text-[#007185]">
           <span className="h-4 border-l border-gray-300"></span>
-          <button onClick={() => onRemove(item.id)} className="hover:underline">Delete</button>
+          <button onClick={() => onRemove(item.itemId)} className="hover:underline">Delete</button>
           <span className="h-4 border-l border-gray-300"></span>
           <button className="hover:underline">Save for later</button>
           <span className="h-4 border-l border-gray-300"></span>
@@ -82,11 +85,11 @@ const Cart = () => {
           
           <div className="divide-y divide-gray-200">
             {cart.map(item => (
-              <CartItem 
-                key={item.id} 
-                item={item} 
-                onUpdateQty={updateQuantity} 
-                onRemove={removeFromCart} 
+              <CartItem
+                key={item.itemId}
+                item={item}
+                onUpdateQty={updateQuantity}
+                onRemove={removeFromCart}
               />
             ))}
           </div>
@@ -175,7 +178,7 @@ const Cart = () => {
             {[
               {name: 'RuggedX Outdoor Speaker', price: 45.99, img: '/images/products/speaker.png'},
               {name: 'TurboCharge 6ft Braided Cable', price: 12.99, img: '/images/products/braided-cable.png'},
-              {name: 'WoolFelt Minimalist Desk Mat', price: 24.00, img: '/images/products/deskmat.png'},
+              {name: 'WoolFelt Minimalist Desk Mat', price: 24.00, img: '/images/products/keyboard.jpg'},
               {name: 'Heritage Leather Journal', price: 18.50, img: '/images/products/journal.png'},
             ].map((p, i) => (
               <div key={i} className="space-y-2 group cursor-pointer">

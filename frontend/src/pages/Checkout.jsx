@@ -22,6 +22,38 @@ const Checkout = () => {
 
    const [orderSuccess, setOrderSuccess] = useState(false);
 
+   const [addresses, setAddresses] = useState([]);
+   const [selectedAddress, setSelectedAddress] = useState(null);
+   const [isChangingAddress, setIsChangingAddress] = useState(false);
+
+   useEffect(() => {
+      const getAddresses = async () => {
+         try {
+            const res = await api.get('/addresses');
+            if (res.data.success && res.data.data.length > 0) {
+               setAddresses(res.data.data);
+               const def = res.data.data.find(a => a.isDefault) || res.data.data[0];
+               setSelectedAddress(def);
+            } else {
+               // Fallback to flat profile address
+               const fallback = {
+                  fullName: user?.name || 'User',
+                  phone: user?.phone || '',
+                  streetAddress: user?.address || '',
+                  city: user?.city || '',
+                  state: user?.state || '',
+                  zipCode: user?.zipCode || '',
+                  country: user?.country || 'India'
+               };
+               setSelectedAddress(fallback);
+            }
+         } catch (err) {
+            console.error('Failed to fetch addresses', err);
+         }
+      };
+      if (user) getAddresses();
+   }, [user]);
+
    useEffect(() => {
       // Wait for cart to finish loading before redirecting — prevents race condition
       // on direct navigation where cart context hasn't fetched yet
@@ -87,17 +119,18 @@ const Checkout = () => {
             items: cart.map(item => ({
                productId: item.id,
                quantity: item.quantity,
-               price: item.price
+               price: item.price,
+               variantId: item.variantId || null,
             })),
             totalAmount: orderTotal,
             shippingAddress: {
-               name: user?.name,
-               address: user?.address,
-               city: user?.city,
-               state: user?.state,
-               zipCode: user?.zipCode,
-               country: user?.country,
-               phone: user?.phone
+               name: selectedAddress?.fullName || user?.name || 'User',
+               address: selectedAddress?.streetAddress || user?.address || '',
+               city: selectedAddress?.city || user?.city || '',
+               state: selectedAddress?.state || user?.state || '',
+               zipCode: selectedAddress?.zipCode || user?.zipCode || '',
+               country: selectedAddress?.country || user?.country || 'India',
+               phone: selectedAddress?.phone || user?.phone || ''
             },
             paymentMethod: paymentMethod,
             paymentId: paymentId
@@ -144,16 +177,66 @@ const Checkout = () => {
 
                {/* Section 1: Delivery Address */}
                <section className="bg-white border border-gray-300 rounded-lg p-5 shadow-sm">
-                  <div className="flex justify-between items-start">
-                     <div className="space-y-1">
-                        <h2 className="text-[17px] font-bold text-[#0F1111]">1 Delivering to {user?.name || 'User'}</h2>
-                        <div className="text-[13px] text-gray-700 ml-5">
-                           <p>{user?.address}, {user?.city}</p>
-                           <p>{user?.state}, {user?.zipCode}, India</p>
-                           <button className="text-[#007185] hover:underline hover:text-[#C45500] mt-1">Add delivery instructions</button>
-                        </div>
+                  <div className="space-y-4">
+                     <div className="flex justify-between items-start">
+                        <h2 className="text-[17px] font-bold text-[#0F1111]">1 Delivery Address</h2>
+                        {!isChangingAddress && addresses.length > 0 && (
+                           <button 
+                              onClick={() => setIsChangingAddress(true)} 
+                              className="text-[#007185] text-[13px] hover:underline"
+                           >
+                              Change
+                           </button>
+                        )}
                      </div>
-                     <Link to="/profile" className="text-[#007185] text-[13px] hover:underline">Change</Link>
+
+                     {isChangingAddress ? (
+                        <div className="space-y-4 ml-5 text-[13px]">
+                           <div className="space-y-3">
+                              {addresses.map(addr => (
+                                 <div key={addr.id} className="flex items-start gap-3 border-b border-gray-50 pb-3 last:border-0 text-gray-700">
+                                    <input 
+                                       type="radio" 
+                                       name="checkoutAddress" 
+                                       id={`addr-${addr.id}`}
+                                       checked={selectedAddress?.id === addr.id}
+                                       onChange={() => setSelectedAddress(addr)}
+                                       className="w-4 h-4 mt-0.5 accent-[#e77600]"
+                                    />
+                                    <label htmlFor={`addr-${addr.id}`} className="cursor-pointer">
+                                       <span className="font-bold">{addr.fullName}</span>, {addr.streetAddress}, {addr.city}, {addr.state} {addr.zipCode}, {addr.country} (Phone: {addr.phone})
+                                    </label>
+                                 </div>
+                              ))}
+                           </div>
+                           <div className="flex gap-3 pt-2">
+                              <button 
+                                 onClick={() => setIsChangingAddress(false)}
+                                 className="px-4 py-1.5 bg-[#FFD814] hover:bg-[#F7CA00] border-[#FCD200] rounded-lg font-medium shadow-sm"
+                              >
+                                 Use this address
+                              </button>
+                              <Link 
+                                 to="/addresses" 
+                                 className="px-4 py-1.5 bg-white border border-[#D5D9D9] hover:bg-gray-50 rounded-lg font-medium shadow-sm text-center"
+                              >
+                                 Manage Addresses
+                              </Link>
+                           </div>
+                        </div>
+                     ) : (
+                        <div className="text-[13px] text-gray-700 ml-5">
+                           <p className="font-bold">{selectedAddress?.fullName}</p>
+                           <p>{selectedAddress?.streetAddress || selectedAddress?.address}</p>
+                           <p>{selectedAddress?.city}, {selectedAddress?.state} {selectedAddress?.zipCode}</p>
+                           <p>{selectedAddress?.country}</p>
+                           {addresses.length === 0 && (
+                              <div className="mt-2">
+                                 <Link to="/addresses" className="text-[#007185] hover:underline font-medium">Add a shipping address</Link>
+                              </div>
+                           )}
+                        </div>
+                     )}
                   </div>
                </section>
 

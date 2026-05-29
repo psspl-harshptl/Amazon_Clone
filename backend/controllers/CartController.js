@@ -12,14 +12,14 @@ class CartController {
 
   async addItem(req, res) {
     try {
-      const { productId, quantity = 1 } = req.body;
+      const { productId, quantity = 1, variantId = null } = req.body;
       if (!productId) {
         return res.status(400).json({ success: false, message: 'productId is required' });
       }
-      const item = await CartService.addItem(req.user.id, productId, quantity);
+      const item = await CartService.addItem(req.user.id, productId, quantity, variantId);
       res.status(201).json({ success: true, data: item });
     } catch (error) {
-      const status = error.message === 'Product not found' ? 404 : 500;
+      const status = error.message.includes('not found') ? 404 : 400;
       res.status(status).json({ success: false, message: error.message });
     }
   }
@@ -33,7 +33,7 @@ class CartController {
       const item = await CartService.updateItem(req.user.id, req.params.itemId, quantity);
       res.json({ success: true, data: item });
     } catch (error) {
-      const status = error.message === 'Cart item not found' ? 404 : 500;
+      const status = error.message === 'Cart item not found' ? 404 : 400;
       res.status(status).json({ success: false, message: error.message });
     }
   }

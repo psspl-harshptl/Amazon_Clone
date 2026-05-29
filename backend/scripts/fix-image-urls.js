@@ -15,16 +15,16 @@ const sequelize = new Sequelize(
   }
 );
 
-// Maps a substring of the broken Amazon CDN filename to a local image path
+// Maps a substring of the broken Amazon CDN filename to a correct local image path
 const URL_MAP = [
-  { match: '61CGHv6kmWL', local: '/images/products/headphones.png' },  // headphones / headset / tablet
-  { match: '61mpMH5TCtL', local: '/images/products/deskmat.png'    },  // gaming mouse
-  { match: '71vFKBpKakL', local: '/images/products/deskmat.png'    },  // laptop / camera / keyboard
-  { match: '61LTuGZTVwL', local: '/images/products/deskmat.png'    },  // gaming monitor
-  { match: '71Y8T1L2BLL', local: '/images/products/cosmetics.png'  },  // scotch-brite scrub pads
-  { match: '61N+V3oT0DL', local: '/images/products/cosmetics.png'  },  // gala brush
-  { match: '71k+V-W8GBL', local: '/images/products/cosmetics.png'  },  // gala steel scrubber
-  { match: '61m+V3oT0DL', local: '/images/products/cosmetics.png'  },  // dish brush
+  { match: '61CGHv6kmWL', local: '/images/products/headset.png'         },  // headset
+  { match: '61mpMH5TCtL', local: '/images/products/gaming-mouse.png'    },  // gaming mouse
+  { match: '71vFKBpKakL', local: '/images/products/laptop.jpg'          },  // laptop / camera / keyboard
+  { match: '61LTuGZTVwL', local: '/images/products/monitor.jpg'         },  // gaming monitor
+  { match: '71Y8T1L2BLL', local: '/images/products/cleaning.jpg'        },  // scotch-brite scrub pads
+  { match: '61N+V3oT0DL', local: '/images/products/cleaning.jpg'        },  // gala brush
+  { match: '71k+V-W8GBL', local: '/images/products/cleaning.jpg'        },  // gala steel scrubber
+  { match: '61m+V3oT0DL', local: '/images/products/cleaning.jpg'        },  // dish brush
   // catch-all: any remaining m.media-amazon.com URL
   { match: 'm.media-amazon.com', local: '/images/products/placeholder.png' },
 ];

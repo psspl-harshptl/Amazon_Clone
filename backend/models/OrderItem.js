@@ -6,25 +6,26 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       OrderItem.belongsTo(models.Order, { foreignKey: 'orderId', as: 'order' });
       OrderItem.belongsTo(models.Product, { foreignKey: 'productId', as: 'product' });
+      OrderItem.belongsTo(models.ProductVariant, { foreignKey: 'variantId', as: 'variant' });
+      OrderItem.hasMany(models.SellerLedger, { foreignKey: 'orderItemId', as: 'ledgerEntries' });
     }
   }
   OrderItem.init({
-    orderId: {
-      type: DataTypes.INTEGER,
+    orderId: { type: DataTypes.INTEGER, allowNull: false },
+    productId: { type: DataTypes.INTEGER, allowNull: false },
+    variantId: { type: DataTypes.INTEGER, allowNull: true },
+    variantLabel: { type: DataTypes.STRING, allowNull: true },
+    quantity: { type: DataTypes.INTEGER, allowNull: false },
+    priceAtPurchase: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
+    status: {
+      type: DataTypes.ENUM('pending', 'packed', 'shipped', 'delivered', 'cancelled'),
+      defaultValue: 'pending',
       allowNull: false
     },
-    productId: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
-    quantity: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
-    priceAtPurchase: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false
-    }
+    carrierName: { type: DataTypes.STRING, allowNull: true },
+    trackingNumber: { type: DataTypes.STRING, allowNull: true },
+    shippedAt: { type: DataTypes.DATE, allowNull: true },
+    deliveredAt: { type: DataTypes.DATE, allowNull: true }
   }, {
     sequelize,
     modelName: 'OrderItem',

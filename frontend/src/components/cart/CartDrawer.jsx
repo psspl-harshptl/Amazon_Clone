@@ -60,23 +60,25 @@ const CartDrawer = () => {
             </div>
           ) : (
             cart.map((item) => (
-              <div key={item.id} className="flex flex-col border-b border-gray-100 pb-6 last:border-0">
+              <div key={item.itemId} className="flex flex-col border-b border-gray-100 pb-6 last:border-0">
                 <div className="flex gap-4 mb-4">
                   <div className="w-[80px] h-[80px] flex-shrink-0 border border-gray-100 rounded bg-white flex items-center justify-center overflow-hidden p-1">
                     <img src={item.imageUrl} alt={item.name} className="w-full h-full object-contain" onError={(e) => { e.target.src = '/images/products/placeholder.png'; }} />
                   </div>
                   <div className="flex-grow">
                     <p className="text-[14px] font-medium text-[#0F1111] line-clamp-2 mb-1">{item.name}</p>
+                    {item.variantLabel && (
+                      <p className="text-[11px] text-[#565959] mb-1">{item.variantLabel}</p>
+                    )}
                     <p className="text-[16px] font-bold text-[#0F1111]">₹{Number(item.price).toLocaleString('en-IN')}</p>
-                    <p className="text-[12px] text-[#B12704] mt-1 font-medium">Only 2 left in stock.</p>
                   </div>
                 </div>
 
                 {/* Yellow-Border Quantity Selector */}
                 <div className="flex justify-start">
                   <div className="flex items-center bg-white border-2 border-[#FFD814] rounded-full px-1 py-0.5 shadow-sm">
-                    <button 
-                      onClick={() => updateQuantity(item.id, -1)}
+                    <button
+                      onClick={() => updateQuantity(item.itemId, -1)}
                       className="p-1.5 hover:text-[#E47911] transition-colors"
                     >
                       {item.quantity === 1 ? (
@@ -86,8 +88,8 @@ const CartDrawer = () => {
                       )}
                     </button>
                     <span className="px-5 text-[15px] font-bold">{item.quantity}</span>
-                    <button 
-                      onClick={() => updateQuantity(item.id, 1)}
+                    <button
+                      onClick={() => updateQuantity(item.itemId, 1)}
                       className="p-1.5 hover:text-[#E47911] transition-colors"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" /></svg>
