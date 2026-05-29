@@ -1,5 +1,6 @@
 'use strict';
 const { Order, OrderItem, Product, ProductVariant, User, SellerLedger, sequelize } = require('../models');
+const CommissionService = require('../services/CommissionService');
 
 async function syncParentOrderStatus(orderId, transaction) {
   const items = await OrderItem.findAll({ where: { orderId }, transaction });
@@ -131,15 +132,17 @@ class SellerOrderController {
 
         if (!existingLedger) {
           const itemTotal = parseFloat(item.priceAtPurchase) * item.quantity;
-          const commissionAmount = parseFloat((itemTotal * 0.10).toFixed(2));
-          
+          const rate = await CommissionService.getRateForPrice(item.priceAtPurchase);
+          const commissionAmount = parseFloat((itemTotal * rate).toFixed(2));
+
           // Credit Sale
           await SellerLedger.create({
             sellerId,
             orderItemId: item.id,
             amount: itemTotal,
             type: 'sale',
-            status: 'cleared'
+            status: 'cleared',
+            rateApplied: rate
           }, { transaction: t });
 
           // Debit Commission
@@ -148,7 +151,8 @@ class SellerOrderController {
             orderItemId: item.id,
             amount: -commissionAmount,
             type: 'commission',
-            status: 'cleared'
+            status: 'cleared',
+            rateApplied: rate
           }, { transaction: t });
         }
       }

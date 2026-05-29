@@ -109,7 +109,7 @@ export default function AdminProducts() {
           </div>
         </div>
 
-        {msg && <div className="p-3 bg-[#DFF2BF] border border-[#4F8A10] text-[#4F8A10] text-[13px] rounded">{msg}</div>}
+        {msg && <div className="p-3 bg-[#DFF2BF] border border-[#4F8A10] text-[#4F8A10] text-[13px] rounded shadow-sm">{msg}</div>}
 
         {/* Tabs */}
         <div className="flex gap-0 border border-gray-300 rounded overflow-hidden w-fit bg-white shadow-sm">
@@ -143,7 +143,7 @@ export default function AdminProducts() {
                     <th className="px-5 py-3 font-medium">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-gray-50">
                   {products.map(p => (
                     <tr key={p.id} className="hover:bg-[#F7F8F8]">
                       <td className="px-5 py-3">

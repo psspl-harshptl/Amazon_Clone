@@ -22,6 +22,7 @@ export default function SellerNavbar() {
           <Link to="/seller/listings" className="hover:text-[#FF9900] transition-colors">My Listings</Link>
           <Link to="/seller/orders" className="hover:text-[#FF9900] transition-colors">Orders</Link>
           <Link to="/seller/financials" className="hover:text-[#FF9900] transition-colors">Payments</Link>
+          <Link to="/seller/commission" className="hover:text-[#FF9900] transition-colors">Commission</Link>
           <Link to="/seller/storefront" className="hover:text-[#FF9900] transition-colors">Storefront Settings</Link>
           <span className="text-gray-400 text-xs">{user?.name}</span>
           <button onClick={handleLogout} className="text-gray-300 hover:text-white transition-colors">Logout</button>

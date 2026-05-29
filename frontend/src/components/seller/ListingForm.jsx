@@ -56,6 +56,7 @@ export default function ListingForm({ initial = {}, onSubmit, loading }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const [dragOver, setDragOver] = useState(false);
+  const [commissionTiers, setCommissionTiers] = useState([]);
   const fileRef = useRef();
 
   const totalImages = existingUrls.length + newFiles.length;
@@ -68,6 +69,10 @@ export default function ListingForm({ initial = {}, onSubmit, loading }) {
     api.get('/products/categories').then(r => setCategories(r.data.data || []));
 
   useEffect(() => { fetchCategories(); }, []);
+
+  useEffect(() => {
+    api.get('/seller/commission-tiers').then(r => setCommissionTiers(r.data.data || [])).catch(() => {});
+  }, []);
 
   const submitCategoryRequest = async () => {
     if (!categoryRequestName.trim()) return;
@@ -340,6 +345,28 @@ export default function ListingForm({ initial = {}, onSubmit, loading }) {
 
         <Field label="Price (₹)" required>
           <Input type="number" min="0.01" step="0.01" value={form.price} onChange={set('price')} placeholder="0.00" />
+          {(() => {
+            const p = parseFloat(form.price);
+            if (!p || p <= 0 || !commissionTiers.length) return null;
+            const tier = commissionTiers.find(t =>
+              p >= parseFloat(t.minPrice) && (t.maxPrice == null || p <= parseFloat(t.maxPrice))
+            );
+            const rate = tier ? parseFloat(tier.rate) : 0.10;
+            const fee  = (p * rate).toFixed(2);
+            const earn = (p - fee).toFixed(2);
+            return (
+              <div className="mt-2 flex items-center gap-2 bg-[#F0F2F2] border border-gray-200 rounded px-3 py-2 text-[12px]">
+                <span className="text-[#565959]">
+                  Platform fee: <strong className="text-[#c45500]">{(rate * 100).toFixed(1)}%</strong>
+                  {tier && <span className="text-[#565959]"> ({tier.label} tier)</span>}
+                </span>
+                <span className="mx-1 text-gray-300">|</span>
+                <span className="text-[#565959]">Fee: <strong className="text-[#CC0C39]">₹{fee}</strong></span>
+                <span className="mx-1 text-gray-300">|</span>
+                <span className="text-[#565959]">You receive: <strong className="text-[#007600]">₹{earn}</strong></span>
+              </div>
+            );
+          })()}
         </Field>
 
         <Field label="MRP (₹)">

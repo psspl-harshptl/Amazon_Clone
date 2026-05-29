@@ -31,6 +31,10 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 'pending',
       allowNull: false,
     },
+    rateApplied: {
+      type: DataTypes.DECIMAL(5, 4),
+      allowNull: true,
+    },
   }, {
     sequelize,
     modelName: 'SellerLedger',
