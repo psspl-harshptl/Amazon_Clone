@@ -1,4 +1,5 @@
-const { Product, ProductImage, ProductSpecification, Category, CategoryRequest } = require('../models');
+const { Product, ProductImage, ProductSpecification, ProductVariant, Category, CategoryRequest } = require('../models');
+const VariantService = require('./VariantService');
 const { Op } = require('sequelize');
 
 function generateSlug(name) {
@@ -13,13 +14,14 @@ class SellerService {
         { model: Category, as: 'category' },
         { model: ProductImage, as: 'galleryImages', attributes: ['id', 'url', 'isMain'] },
         { model: ProductSpecification, as: 'specifications', attributes: ['id', 'key', 'value'] },
+        { model: ProductVariant, as: 'variants', attributes: ['id', 'size', 'color', 'stock', 'sku'] },
       ],
       order: [['createdAt', 'DESC']],
     });
   }
 
   async createProduct(sellerId, data) {
-    const { name, description, price, mrp, stock, categoryId, imageUrl, imageUrls, brand, discount_percent, specifications } = data;
+    const { name, description, price, mrp, stock, categoryId, imageUrl, imageUrls, brand, discount_percent, specifications, variants } = data;
     const product = await Product.create({
       sellerId,
       name,
@@ -50,6 +52,10 @@ class SellerService {
       }
     }
 
+    if (variants && variants.length > 0) {
+      await VariantService.bulkReplaceVariants(product.id, variants);
+    }
+
     return product;
   }
 
@@ -57,7 +63,7 @@ class SellerService {
     const product = await Product.findOne({ where: { id: productId, sellerId } });
     if (!product) throw new Error('Product not found or access denied');
 
-    const { name, description, price, mrp, stock, categoryId, imageUrl, imageUrls, brand, discount_percent, specifications } = data;
+    const { name, description, price, mrp, stock, categoryId, imageUrl, imageUrls, brand, discount_percent, specifications, variants } = data;
     const updates = { description, price, mrp, stock, categoryId, imageUrl, brand, discount_percent };
     if (name && name !== product.name) {
       updates.name = name;
@@ -82,7 +88,17 @@ class SellerService {
       }
     }
 
-    return product.reload({ include: [{ model: Category, as: 'category' }, { model: ProductSpecification, as: 'specifications' }] });
+    if (variants !== undefined) {
+      await VariantService.bulkReplaceVariants(productId, variants);
+    }
+
+    return product.reload({
+      include: [
+        { model: Category, as: 'category' },
+        { model: ProductSpecification, as: 'specifications' },
+        { model: ProductVariant, as: 'variants' },
+      ],
+    });
   }
 
   async deleteProduct(sellerId, productId) {
@@ -114,7 +130,8 @@ class SellerService {
       limit: 5,
       include: [{ model: Category, as: 'category' }],
     });
-    return { total, pending, approved, rejected, recent };
+    const lowStockAlerts = await VariantService.getLowStockProducts(sellerId);
+    return { total, pending, approved, rejected, recent, lowStockCount: lowStockAlerts.length };
   }
 }
 

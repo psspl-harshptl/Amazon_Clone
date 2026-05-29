@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 
@@ -66,6 +67,28 @@ const Profile = () => {
     <div className="bg-[#EAEDED] min-h-screen py-10">
       <div className="max-w-[1000px] mx-auto px-4">
         <h1 className="text-3xl font-medium mb-6">Your Account Settings</h1>
+
+        {/* Dashboard Quick Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <Link to="/addresses" className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 flex items-start gap-4 transition-colors">
+            <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center text-[#E47911] flex-shrink-0 animate-fade-in">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            </div>
+            <div>
+              <h3 className="font-bold text-[#0F1111] text-[17px] mb-1">Your Addresses</h3>
+              <p className="text-gray-500 text-xs leading-normal">Edit, remove or set default addresses for your orders and deliveries.</p>
+            </div>
+          </Link>
+          <Link to="/wishlist" className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 flex items-start gap-4 transition-colors">
+            <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center text-[#E47911] flex-shrink-0 animate-fade-in">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+            </div>
+            <div>
+              <h3 className="font-bold text-[#0F1111] text-[17px] mb-1">Your Wish List</h3>
+              <p className="text-gray-500 text-xs leading-normal">View items you've saved to your list, move them to cart or remove them.</p>
+            </div>
+          </Link>
+        </div>
 
         {message.text && (
           <div className={`mb-6 p-4 rounded-lg border ${message.type === 'success' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'}`}>

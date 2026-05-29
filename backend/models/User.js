@@ -7,6 +7,10 @@ module.exports = (sequelize) => {
       User.hasOne(models.Cart, { foreignKey: 'userId', as: 'cart' });
       User.hasMany(models.Product, { foreignKey: 'sellerId', as: 'listings' });
       User.hasMany(models.Review,  { foreignKey: 'userId',   as: 'reviews' });
+      User.hasMany(models.Address, { foreignKey: 'userId', as: 'addresses' });
+      User.hasMany(models.WishlistItem, { foreignKey: 'userId', as: 'wishlistItems' });
+      User.hasMany(models.SellerLedger, { foreignKey: 'sellerId', as: 'ledgerEntries' });
+      User.hasMany(models.PayoutRequest, { foreignKey: 'sellerId', as: 'payoutRequests' });
     }
   }
 
@@ -30,6 +34,11 @@ module.exports = (sequelize) => {
     state: DataTypes.STRING,
     zipCode: DataTypes.STRING,
     country: DataTypes.STRING,
+    storeName: { type: DataTypes.STRING, allowNull: true },
+    storeLogo: { type: DataTypes.STRING, allowNull: true },
+    storeBanner: { type: DataTypes.STRING, allowNull: true },
+    storeDescription: { type: DataTypes.TEXT, allowNull: true },
+    bankDetails: { type: DataTypes.JSONB, allowNull: true },
   }, {
     sequelize,
     modelName: 'User',

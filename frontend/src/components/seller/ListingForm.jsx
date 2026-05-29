@@ -21,6 +21,9 @@ const Input = (props) => (
   />
 );
 
+const FASHION_SLUG = 'fashion';
+const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'];
+
 export default function ListingForm({ initial = {}, onSubmit, loading }) {
   const [categories, setCategories] = useState([]);
   const [categoryRequestName, setCategoryRequestName] = useState('');
@@ -38,6 +41,12 @@ export default function ListingForm({ initial = {}, onSubmit, loading }) {
       : []
   );
 
+  const [variants, setVariants] = useState(
+    () => (initial.variants?.length > 0)
+      ? initial.variants.map(v => ({ size: v.size || '', color: v.color || '', stock: v.stock ?? 0 }))
+      : []
+  );
+
   // existing = URLs already on server; newFiles = {file, preview} not yet uploaded
   const [existingUrls, setExistingUrls] = useState(() => {
     if (initial.galleryImages?.length > 0) return initial.galleryImages.map(g => g.url);
@@ -51,6 +60,9 @@ export default function ListingForm({ initial = {}, onSubmit, loading }) {
 
   const totalImages = existingUrls.length + newFiles.length;
   const canAddMore = totalImages < MAX_IMAGES;
+
+  const selectedCategory = categories.find(c => String(c.id) === String(form.categoryId));
+  const isFashion = selectedCategory?.slug === FASHION_SLUG;
 
   const fetchCategories = () =>
     api.get('/products/categories').then(r => setCategories(r.data.data || []));
@@ -81,7 +93,15 @@ export default function ListingForm({ initial = {}, onSubmit, loading }) {
       setCategoryRequestStatus(null);
       setCategoryRequestName('');
     }
+    // Reset variants when switching away from fashion
+    const cat = categories.find(c => String(c.id) === val);
+    if (!cat || cat.slug !== FASHION_SLUG) setVariants([]);
   };
+
+  const addVariant = () => setVariants(v => [...v, { size: '', color: '', stock: 0 }]);
+  const removeVariant = (i) => setVariants(v => v.filter((_, idx) => idx !== i));
+  const setVariantField = (i, field, val) =>
+    setVariants(v => v.map((row, idx) => idx === i ? { ...row, [field]: val } : row));
 
   const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
 
@@ -137,6 +157,11 @@ export default function ListingForm({ initial = {}, onSubmit, loading }) {
     if (!form.price || parseFloat(form.price) <= 0) return setError('Price must be greater than 0');
     if (!form.categoryId || form.categoryId === 'other') return setError('Select a valid category. If yours is missing, submit a request above — you can list this product once it\'s approved.');
 
+    if (isFashion) {
+      const validVariants = variants.filter(v => v.size || v.color);
+      if (validVariants.length === 0) return setError('Fashion products must have at least one size/color variant.');
+    }
+
     let uploadedUrls = [];
     if (newFiles.length > 0) {
       setUploading(true);
@@ -160,6 +185,7 @@ export default function ListingForm({ initial = {}, onSubmit, loading }) {
       imageUrls,
       discount_percent: discountPercent ?? 0,
       specifications: specs.filter(s => s.key.trim() && s.value.trim()),
+      variants: isFashion ? variants.filter(v => v.size || v.color) : [],
     });
   };
 
@@ -320,9 +346,11 @@ export default function ListingForm({ initial = {}, onSubmit, loading }) {
           <Input type="number" min="0" step="0.01" value={form.mrp} onChange={set('mrp')} placeholder="0.00" />
         </Field>
 
-        <Field label="Stock Quantity">
-          <Input type="number" min="0" value={form.stock} onChange={set('stock')} placeholder="0" />
-        </Field>
+        {!isFashion && (
+          <Field label="Stock Quantity">
+            <Input type="number" min="0" value={form.stock} onChange={set('stock')} placeholder="0" />
+          </Field>
+        )}
 
         <Field label="Discount">
           {discountPercent !== null ? (
@@ -413,6 +441,85 @@ export default function ListingForm({ initial = {}, onSubmit, loading }) {
           </div>
         )}
       </div>
+
+      {/* Variant Management — Fashion only */}
+      {isFashion && (
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <label className="block text-[13px] font-bold text-[#0F1111]">
+                Size &amp; Color Variants <span className="text-[#CC0C39]">*</span>
+              </label>
+              <p className="text-[11px] text-[#565959] mt-0.5">Each row = one variant with its own stock. Required for fashion products.</p>
+            </div>
+            <button
+              type="button"
+              onClick={addVariant}
+              className="flex items-center gap-1 text-xs text-[#0066c0] hover:text-[#c45500] hover:underline"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add variant
+            </button>
+          </div>
+
+          {variants.length === 0 ? (
+            <button
+              type="button"
+              onClick={addVariant}
+              className="w-full border-2 border-dashed border-gray-300 hover:border-[#e77600] rounded-lg py-4 text-sm text-gray-400 hover:text-[#e77600] transition-colors"
+            >
+              + Add your first variant (Size / Color / Stock)
+            </button>
+          ) : (
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
+              <div className="grid grid-cols-[1fr_1fr_80px_32px] bg-gray-50 border-b border-gray-200 px-3 py-1.5 text-[11px] font-bold text-[#565959] uppercase tracking-wide">
+                <span>Size</span>
+                <span>Color</span>
+                <span>Stock</span>
+                <span />
+              </div>
+              {variants.map((v, i) => (
+                <div key={i} className="grid grid-cols-[1fr_1fr_80px_32px] items-center border-b border-gray-100 last:border-0 px-3 py-2 gap-2">
+                  <select
+                    value={v.size}
+                    onChange={e => setVariantField(i, 'size', e.target.value)}
+                    className="border border-gray-300 rounded px-2 py-1 text-sm text-[#0F1111] focus:outline-none focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600] bg-white"
+                  >
+                    <option value="">— Size —</option>
+                    {SIZES.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                  <input
+                    type="text"
+                    value={v.color}
+                    onChange={e => setVariantField(i, 'color', e.target.value)}
+                    placeholder="e.g. Red"
+                    className="border border-gray-300 rounded px-2 py-1 text-sm text-[#0F1111] focus:outline-none focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600]"
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    value={v.stock}
+                    onChange={e => setVariantField(i, 'stock', e.target.value)}
+                    placeholder="0"
+                    className="border border-gray-300 rounded px-2 py-1 text-sm text-[#0F1111] focus:outline-none focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeVariant(i)}
+                    className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-[#CC0C39] hover:bg-red-50 rounded transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <button
         type="submit"

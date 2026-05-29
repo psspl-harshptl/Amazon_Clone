@@ -215,6 +215,8 @@ export default function Navbar() {
                   </div>
                   <Link to="/orders" onClick={() => setShowDropdown(false)} className="px-4 py-1.5 text-[13px] hover:bg-gray-100 hover:text-[#C7511F]">My Orders</Link>
                   <Link to="/profile" onClick={() => setShowDropdown(false)} className="px-4 py-1.5 text-[13px] hover:bg-gray-100 hover:text-[#C7511F]">Profile Settings</Link>
+                  <Link to="/addresses" onClick={() => setShowDropdown(false)} className="px-4 py-1.5 text-[13px] hover:bg-gray-100 hover:text-[#C7511F]">Your Addresses</Link>
+                  <Link to="/wishlist" onClick={() => setShowDropdown(false)} className="px-4 py-1.5 text-[13px] hover:bg-gray-100 hover:text-[#C7511F]">Your Wish List</Link>
                   <div className="border-t border-gray-100 mt-1 pt-1">
                     <button 
                       onClick={() => { logout(); setShowDropdown(false); }}
@@ -231,6 +233,11 @@ export default function Navbar() {
           <Link to="/orders" className="border border-transparent hover:border-white hidden sm:flex flex-col px-2 py-1 leading-tight">
             <span className="text-[11px] text-[#ccc]">Returns</span>
             <span className="text-[13px] font-bold">& Orders</span>
+          </Link>
+
+          <Link to="/wishlist" className="border border-transparent hover:border-white hidden sm:flex flex-col px-2 py-1 leading-tight">
+            <span className="text-[11px] text-[#ccc]">Your</span>
+            <span className="text-[13px] font-bold">Wish List</span>
           </Link>
 
           <div onClick={() => toggleDrawer(true)}>

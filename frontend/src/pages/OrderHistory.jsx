@@ -70,7 +70,9 @@ const OrderCard = ({ order }) => {
   const navigate = useNavigate();
   const isDelivered = order.status === 'delivered';
   const isPending = order.status === 'pending' || order.status === 'confirmed';
-  const deliveryDate = order.deliveredAt ? new Date(order.deliveredAt) : getDeliveryDate(order.createdAt);
+  const deliveryDate = (order.status === 'delivered' || order.status === 'returned')
+    ? new Date(order.updatedAt)
+    : getDeliveryDate(order.createdAt);
   const st = statusLabel[order.status] || statusLabel.pending;
 
   return (
@@ -162,10 +164,16 @@ const OrderCard = ({ order }) => {
             <div className="hidden md:flex flex-col gap-2 flex-shrink-0 w-[200px]">
               {isDelivered && (
                 <>
-                  <button className="w-full bg-white hover:bg-gray-50 text-[13px] text-[#0F1111] border border-[#d5d9d9] rounded-lg py-1.5 shadow-sm transition-colors">
+                  <button 
+                    onClick={() => navigate(`/orders/${order.id}`)}
+                    className="w-full bg-white hover:bg-gray-50 text-[13px] text-[#0F1111] border border-[#d5d9d9] rounded-lg py-1.5 shadow-sm transition-colors"
+                  >
                     Track package
                   </button>
-                  <button className="w-full bg-white hover:bg-gray-50 text-[13px] text-[#0F1111] border border-[#d5d9d9] rounded-lg py-1.5 shadow-sm transition-colors">
+                  <button 
+                    onClick={() => navigate(`/orders/${order.id}`)}
+                    className="w-full bg-white hover:bg-gray-50 text-[13px] text-[#0F1111] border border-[#d5d9d9] rounded-lg py-1.5 shadow-sm transition-colors"
+                  >
                     Return items
                   </button>
                   <button
@@ -177,7 +185,10 @@ const OrderCard = ({ order }) => {
                 </>
               )}
               {isPending && (
-                <button className="w-full bg-white hover:bg-gray-50 text-[13px] text-[#0F1111] border border-[#d5d9d9] rounded-lg py-1.5 shadow-sm transition-colors">
+                <button 
+                  onClick={() => navigate(`/orders/${order.id}`)}
+                  className="w-full bg-white hover:bg-gray-50 text-[13px] text-[#0F1111] border border-[#d5d9d9] rounded-lg py-1.5 shadow-sm transition-colors"
+                >
                   Track package
                 </button>
               )}

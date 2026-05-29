@@ -34,31 +34,65 @@ const FilterPill = ({ label, onRemove }) => (
   </div>
 );
 
+const PAGE_SIZE = 20;
+
 const ProductList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart } = useCart();
   const [products, setProducts] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [filters, setFilters] = useState({ brands: [], priceRange: { min: 0, max: 0 } });
   const [loading, setLoading] = useState(true);
 
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  const fetchProducts = async (currentPage) => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams(searchParams);
+      params.set('limit', PAGE_SIZE);
+      params.set('page', currentPage);
+      const [prodRes, filtRes] = await Promise.all([
+        api.get(`/products?${params.toString()}`),
+        api.get(`/products/filters?categoryId=${searchParams.get('categoryId') || ''}`)
+      ]);
+      setProducts(prodRes.data.data.rows || []);
+      setTotal(prodRes.data.data.count || 0);
+      setFilters(filtRes.data.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Reset to page 1 and re-fetch when filters change
   useEffect(() => {
-    const fetchAll = async () => {
-      setLoading(true);
-      try {
-        const [prodRes, filtRes] = await Promise.all([
-          api.get(`/products?${searchParams.toString()}`),
-          api.get(`/products/filters?categoryId=${searchParams.get('categoryId') || ''}`)
-        ]);
-        setProducts(prodRes.data.data.rows || []);
-        setFilters(filtRes.data.data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAll();
+    setPage(1);
+    fetchProducts(1);
   }, [searchParams]);
+
+  // Re-fetch when page changes (but not on initial load — searchParams effect covers that)
+  useEffect(() => {
+    if (page !== 1) fetchProducts(page);
+  }, [page]);
+
+  const goTo = (p) => {
+    if (p >= 1 && p <= totalPages) {
+      setPage(p);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const pageNumbers = () => {
+    const range = [];
+    const delta = 2;
+    for (let i = Math.max(1, page - delta); i <= Math.min(totalPages, page + delta); i++) range.push(i);
+    if (range[0] > 1) { range.unshift('...'); range.unshift(1); }
+    if (range[range.length - 1] < totalPages) { range.push('...'); range.push(totalPages); }
+    return range;
+  };
 
   const handleFilter = (key, value) => {
     const newParams = new URLSearchParams(searchParams);
@@ -204,7 +238,11 @@ const ProductList = () => {
           <div className="mb-4 border-b border-gray-100 pb-2 flex justify-between items-center">
             <div>
               <h1 className="text-lg font-bold text-[#0F1111]">Results</h1>
-              <p className="text-[13px] text-[#565959]">Price and other details may vary based on product size and colour.</p>
+              <p className="text-[13px] text-[#565959]">
+                {total > 0
+                  ? `Showing ${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, total)} of ${total} results`
+                  : 'Price and other details may vary based on product size and colour.'}
+              </p>
             </div>
             <select className="text-xs bg-gray-100 border border-gray-300 p-1.5 rounded-lg outline-none cursor-pointer" onChange={(e) => handleFilter('sort', e.target.value)}>
               <option value="">Sort by: Featured</option>
@@ -222,6 +260,7 @@ const ProductList = () => {
               <p className="text-gray-500">Try adjusting your filters or search query.</p>
             </div>
           ) : (
+            <>
             <div className="space-y-4">
               {products.map((p) => (
                 <div key={p.id} className="flex flex-col sm:flex-row gap-4 sm:gap-6 border border-gray-100 rounded-lg overflow-hidden group hover:shadow-md transition-shadow p-2">
@@ -257,7 +296,7 @@ const ProductList = () => {
                       FREE delivery <span className="font-bold">Sat, 2 May</span> on first order
                     </p>
 
-                    <button 
+                    <button
                       onClick={() => addToCart(p, 1)}
                       className="bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] text-[13px] px-5 py-1.5 rounded-full shadow-sm transition-all active:scale-95 font-medium"
                     >
@@ -267,6 +306,41 @@ const ProductList = () => {
                 </div>
               ))}
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between mt-8 pt-4 border-t border-gray-200">
+                <p className="text-[13px] text-[#565959]">
+                  Page {page} of {totalPages}
+                </p>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => goTo(page - 1)} disabled={page === 1}
+                    className="px-3 py-1.5 text-[13px] border border-gray-300 rounded bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >← Prev</button>
+
+                  {pageNumbers().map((n, i) =>
+                    n === '...'
+                      ? <span key={`e${i}`} className="px-2 text-[#565959] text-[13px]">…</span>
+                      : <button
+                          key={n}
+                          onClick={() => goTo(n)}
+                          className={`w-8 h-8 text-[13px] border rounded transition-colors ${
+                            n === page
+                              ? 'bg-[#232F3E] text-white border-[#232F3E]'
+                              : 'bg-white border-gray-300 hover:bg-gray-50 text-[#0F1111]'
+                          }`}
+                        >{n}</button>
+                  )}
+
+                  <button
+                    onClick={() => goTo(page + 1)} disabled={page === totalPages}
+                    className="px-3 py-1.5 text-[13px] border border-gray-300 rounded bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >Next →</button>
+                </div>
+              </div>
+            )}
+            </>
           )}
         </main>
       </div>

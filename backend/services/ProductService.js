@@ -1,4 +1,4 @@
-const { Product, Category, ProductImage, ProductSpecification, ProductFeature, Sequelize } = require('../models');
+const { Product, Category, ProductImage, ProductSpecification, ProductFeature, ProductVariant, User, Sequelize } = require('../models');
 const { Op } = require('sequelize');
 
 class ProductService {
@@ -75,8 +75,10 @@ class ProductService {
         { model: Category, as: 'category' },
         { model: ProductImage, as: 'galleryImages' },
         { model: ProductSpecification, as: 'specifications' },
-        { model: ProductFeature, as: 'features' }
-      ]
+        { model: ProductFeature, as: 'features' },
+        { model: ProductVariant, as: 'variants' },
+        { model: User, as: 'seller', attributes: ['id', 'name', 'storeName'] }
+      ],
     });
     if (product) {
       await product.increment('viewCount', { by: 1 });

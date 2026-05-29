@@ -40,3 +40,34 @@
     @apply text-white hover:border border-transparent hover:border-white p-2 flex flex-col justify-center leading-tight;
   }
 }
+
+@media print {
+  body {
+    background-color: white !important;
+    background-image: none !important;
+    color: black !important;
+    font-size: 12pt !important;
+  }
+  
+  /* Hide standard headers, footers and navigation served by the main app */
+  header, nav, footer, .no-print, button, input, textarea {
+    display: none !important;
+  }
+
+  @page {
+    size: auto;
+    margin: 15mm 15mm 15mm 15mm;
+  }
+
+  /* Force print-only element block display */
+  .print-invoice-container {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
+

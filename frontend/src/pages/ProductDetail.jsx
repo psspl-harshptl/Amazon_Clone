@@ -42,6 +42,8 @@ const ProductDetail = () => {
   const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState(() => searchParams.get('tab') || 'specs');
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [selectedColor, setSelectedColor] = useState(null);
 
   // Reviews state
   const [reviews, setReviews]           = useState([]);
@@ -88,6 +90,8 @@ const ProductDetail = () => {
     }
   }, [id, user]);
 
+
+
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     if (!reviewForm.comment.trim()) return setReviewError('Please write a review comment');
@@ -122,13 +126,76 @@ const ProductDetail = () => {
     }
   };
 
+  // Derived variant data
+  const variants = product?.variants || [];
+  const hasFashionVariants = variants.length > 0;
+  const sizes = [...new Set(variants.map(v => v.size).filter(Boolean))].sort();
+  const availableColors = selectedSize
+    ? [...new Set(variants.filter(v => v.size === selectedSize).map(v => v.color).filter(Boolean))].sort()
+    : [...new Set(variants.map(v => v.color).filter(Boolean))].sort();
+
+  const selectedVariant = hasFashionVariants
+    ? variants.find(v =>
+        (!selectedSize || v.size === selectedSize) &&
+        (!selectedColor || v.color === selectedColor)
+      )
+    : null;
+
+  const variantLabel = selectedVariant
+    ? [selectedSize && `Size: ${selectedSize}`, selectedColor && `Color: ${selectedColor}`].filter(Boolean).join(' / ')
+    : null;
+
+  const stockCount = hasFashionVariants
+    ? (selectedVariant ? selectedVariant.stock : 0)
+    : (product?.stock != null ? product.stock : 10);
+
+  const isOutOfStock = hasFashionVariants
+    ? (selectedVariant ? selectedVariant.stock <= 0 : false)
+    : (product?.stock != null && product.stock <= 0);
+
+  const canAddToCart = hasFashionVariants
+    ? (selectedVariant && selectedVariant.stock > 0)
+    : (product?.stock == null || product.stock > 0);
+
+  // Adjust quantity if it exceeds available stock when variant or product changes
+  useEffect(() => {
+    if (product) {
+      const maxStock = product.variants?.length > 0
+        ? (selectedVariant ? selectedVariant.stock : 0)
+        : (product.stock != null ? product.stock : 10);
+      if (quantity > maxStock && maxStock > 0) {
+        setQuantity(maxStock);
+      }
+    }
+  }, [selectedVariant, product]);
+
   const handleAddToCart = () => {
-    addToCart(product, quantity);
+    if (hasFashionVariants && !selectedVariant) return;
+    addToCart(product, quantity, selectedVariant?.id || null, variantLabel);
   };
 
   const handleBuyNow = () => {
-    addToCart(product, quantity);
+    if (hasFashionVariants && !selectedVariant) return;
+    addToCart(product, quantity, selectedVariant?.id || null, variantLabel);
     navigate('/checkout');
+  };
+
+  const handleAddToWishlist = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    try {
+      const res = await api.post('/wishlist', {
+        productId: parseInt(id),
+        variantId: selectedVariant?.id || null
+      });
+      if (res.data.success) {
+        alert(res.data.message || 'Added to Wish List!');
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to add to Wish List.');
+    }
   };
 
   if (loading) return (
@@ -188,7 +255,13 @@ const ProductDetail = () => {
           <div className="border-b border-gray-100 pb-4">
             <h1 className="text-[24px] font-medium leading-snug text-[#0F1111] mb-1">{product.name}</h1>
             <div className="flex items-center gap-4 text-sm mt-2">
-               <a href="#" className="text-[#007185] hover:text-[#C7511F] hover:underline">Visit the {product.brand || 'Store'}</a>
+               {product.seller ? (
+                 <Link to={`/stores/${product.seller.id}`} className="text-[#007185] hover:text-[#C7511F] hover:underline">
+                   Visit the {product.seller.storeName || product.seller.name}
+                 </Link>
+               ) : (
+                 <a href="#" className="text-[#007185] hover:text-[#C7511F] hover:underline">Visit the {product.brand || 'Store'}</a>
+               )}
                <StarRating rating={product.rating} count={product.reviewCount} />
             </div>
           </div>
@@ -230,24 +303,105 @@ const ProductDetail = () => {
               <span className="text-2xl font-medium">{Number(product.price).toLocaleString('en-IN')}</span>
             </div>
             <p className="text-[#007185] text-sm hover:underline cursor-pointer">FREE delivery <span className="font-bold">Wednesday, October 25</span></p>
-            <div className="text-[#007600] text-lg font-medium">In Stock</div>
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium">Quantity:</span>
-              <select value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} className="bg-[#F0F2F2] border border-[#D5D9D9] rounded-lg py-1 px-3 text-sm">
-                {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}</option>)}
-              </select>
-            </div>
-            <button 
+
+            {hasFashionVariants ? (
+              <div className="space-y-3">
+                {sizes.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium text-[#0F1111] mb-1.5">
+                      Size: {selectedSize && <span className="font-bold">{selectedSize}</span>}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {sizes.map(s => (
+                        <button
+                          key={s}
+                          onClick={() => { setSelectedSize(s); setSelectedColor(null); }}
+                          className={`px-3 py-1 border rounded text-sm transition-all ${
+                            selectedSize === s
+                              ? 'border-[#E47911] bg-orange-50 font-medium ring-1 ring-[#E47911]'
+                              : 'border-gray-300 hover:border-[#E47911]'
+                          }`}
+                        >{s}</button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {availableColors.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium text-[#0F1111] mb-1.5">
+                      Color: {selectedColor && <span className="font-bold">{selectedColor}</span>}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {availableColors.map(c => (
+                        <button
+                          key={c}
+                          onClick={() => setSelectedColor(c)}
+                          className={`px-3 py-1 border rounded text-sm transition-all ${
+                            selectedColor === c
+                              ? 'border-[#E47911] bg-orange-50 font-medium ring-1 ring-[#E47911]'
+                              : 'border-gray-300 hover:border-[#E47911]'
+                          }`}
+                        >{c}</button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {selectedVariant ? (
+                  <div className={`text-sm font-medium ${selectedVariant.stock > 0 ? (selectedVariant.stock <= 5 ? 'text-[#B12704]' : 'text-[#007600]') : 'text-[#CC0C39]'}`}>
+                    {selectedVariant.stock > 0 
+                      ? (selectedVariant.stock <= 5 
+                          ? `Only ${selectedVariant.stock} left in stock - order soon.` 
+                          : `In Stock (${selectedVariant.stock} left)`)
+                      : 'Out of Stock'}
+                  </div>
+                ) : (
+                  <div className="text-sm text-[#565959]">Select options above</div>
+                )}
+              </div>
+            ) : (
+              <div className={`text-lg font-medium ${(product.stock === null || product.stock > 0) ? (product.stock !== null && product.stock <= 5 ? 'text-[#B12704]' : 'text-[#007600]') : 'text-[#CC0C39]'}`}>
+                {product.stock === null || product.stock > 0 
+                  ? (product.stock !== null && product.stock <= 5 
+                      ? `Only ${product.stock} left in stock - order soon.` 
+                      : 'In Stock')
+                  : 'Currently Unavailable / Out of Stock'}
+              </div>
+            )}
+
+            {!isOutOfStock && canAddToCart && (
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium">Quantity:</span>
+                <select 
+                  value={quantity} 
+                  onChange={(e) => setQuantity(Number(e.target.value))} 
+                  className="bg-[#F0F2F2] border border-[#D5D9D9] rounded-lg py-1 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#e77600] focus:border-[#e77600]"
+                >
+                  {Array.from({ length: Math.min(stockCount, 10) }, (_, i) => i + 1).map(n => (
+                    <option key={n} value={n}>{n}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+            <button
               onClick={handleAddToCart}
-              className="w-full bg-[#FFD814] hover:bg-[#F7CA00] border border-[#FCD200] rounded-full py-2.5 text-[14px] font-medium shadow-sm active:scale-95 transition-transform"
+              disabled={!canAddToCart}
+              className="w-full bg-[#FFD814] hover:bg-[#F7CA00] border border-[#FCD200] rounded-full py-2.5 text-[14px] font-medium shadow-sm active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Add to Cart
+              {hasFashionVariants && !selectedVariant ? 'Select a size/color' : 'Add to Cart'}
             </button>
-            <button 
+            <button
               onClick={handleBuyNow}
-              className="w-full bg-[#FFA41C] hover:bg-[#FA8914] border border-[#FF8F00] rounded-full py-2.5 text-[14px] font-medium shadow-sm active:scale-95 transition-transform"
+              disabled={!canAddToCart}
+              className="w-full bg-[#FFA41C] hover:bg-[#FA8914] border border-[#FF8F00] rounded-full py-2.5 text-[14px] font-medium shadow-sm active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed text-[#0F1111]"
             >
               Buy Now
+            </button>
+            <hr className="border-gray-200 my-2" />
+            <button
+              onClick={handleAddToWishlist}
+              className="w-full bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-full py-2.5 text-[14px] font-medium shadow-sm active:scale-95 transition-transform text-[#0F1111]"
+            >
+              Add to Wish List
             </button>
           </div>
         </div>

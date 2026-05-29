@@ -20,7 +20,7 @@ module.exports = {
           description: 'Efficient cleaning with heavy-duty scrub pads.',
           price: 75.00, mrp: 100.00, stock: 500,
           brand: 'Scotch-Brite',
-          imageUrl: '/images/products/cosmetics.png',
+          imageUrl: '/images/products/cleaning.jpg',
           rating: 4.4, reviewCount: 10500, is_best_seller: true,
           createdAt: new Date(), updatedAt: new Date()
         },
@@ -31,7 +31,7 @@ module.exports = {
           description: 'Soft bristles for gentle yet effective cleaning.',
           price: 109.00, mrp: 120.00, stock: 200,
           brand: 'Gala',
-          imageUrl: '/images/products/cosmetics.png',
+          imageUrl: '/images/products/cleaning.jpg',
           rating: 4.3, reviewCount: 1100, is_top_deal: true, discount_percent: 9,
           createdAt: new Date(), updatedAt: new Date()
         },
@@ -42,7 +42,7 @@ module.exports = {
           description: 'Durable steel scrubbers for tough stains.',
           price: 120.00, mrp: 240.00, stock: 350,
           brand: 'Gala',
-          imageUrl: '/images/products/cosmetics.png',
+          imageUrl: '/images/products/cleaning.jpg',
           rating: 4.3, reviewCount: 2700, is_top_deal: true, discount_percent: 50,
           createdAt: new Date(), updatedAt: new Date()
         },
@@ -53,7 +53,7 @@ module.exports = {
           description: 'Dual action bristles for versatile cleaning.',
           price: 169.00, mrp: 180.00, stock: 150,
           brand: 'Cello',
-          imageUrl: '/images/products/cosmetics.png',
+          imageUrl: '/images/products/cleaning.jpg',
           rating: 4.3, reviewCount: 4500,
           createdAt: new Date(), updatedAt: new Date()
         },
@@ -64,7 +64,7 @@ module.exports = {
           description: 'Protection and scent for your kitchen tasks.',
           price: 130.00, mrp: 150.00, stock: 120,
           brand: 'Scotch-Brite',
-          imageUrl: '/images/products/cosmetics.png',
+          imageUrl: '/images/products/cleaning.jpg',
           rating: 4.1, reviewCount: 2400,
           createdAt: new Date(), updatedAt: new Date()
         }

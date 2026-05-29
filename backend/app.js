@@ -12,7 +12,9 @@ const allowedOrigins = [
   process.env.CORS_ORIGIN,
   "https://amazon-clone-harshptl.netlify.app",
   "http://localhost:5173",
-  "http://localhost:3000",
+  "http://localhost:3000", // buyer
+  "http://localhost:3001", // seller
+  "http://localhost:3002", // admin
 ].filter(Boolean);
 
 app.use(cors({

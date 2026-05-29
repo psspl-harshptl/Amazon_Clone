@@ -11,13 +11,26 @@ const Stat = ({ label, value, color }) => (
   </div>
 );
 
+const LowStockBadge = ({ stock }) => (
+  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${stock === 0 ? 'bg-red-100 text-[#CC0C39]' : 'bg-orange-100 text-[#c45500]'}`}>
+    {stock === 0 ? 'Out of stock' : `${stock} left`}
+  </span>
+);
+
 export default function SellerDashboard() {
   const [stats, setStats] = useState(null);
+  const [lowStock, setLowStock] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/seller/dashboard')
-      .then(r => setStats(r.data.data))
+    Promise.all([
+      api.get('/seller/dashboard'),
+      api.get('/seller/inventory/low-stock'),
+    ])
+      .then(([dashRes, stockRes]) => {
+        setStats(dashRes.data.data);
+        setLowStock(stockRes.data.data || []);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
@@ -40,6 +53,46 @@ export default function SellerDashboard() {
               <Stat label="Approved"         value={stats?.approved} color="text-[#007600]" />
               <Stat label="Rejected"         value={stats?.rejected} color="text-[#CC0C39]" />
             </div>
+
+            {/* Low Stock Alerts */}
+            {lowStock.length > 0 && (
+              <div className="bg-white border border-orange-200 rounded shadow-sm">
+                <div className="flex items-center gap-2 px-5 py-4 border-b border-orange-100 bg-orange-50">
+                  <svg className="w-5 h-5 text-[#c45500]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                  </svg>
+                  <h2 className="text-[15px] font-bold text-[#c45500]">Low Stock Alerts ({lowStock.length})</h2>
+                  <span className="ml-auto text-[12px] text-[#565959]">Stock ≤ 10 units</span>
+                </div>
+                <table className="w-full text-[13px]">
+                  <thead>
+                    <tr className="text-left text-[11px] text-[#565959] uppercase border-b border-gray-100 bg-[#F7F8F8]">
+                      <th className="px-5 py-3 font-medium">Product</th>
+                      <th className="px-5 py-3 font-medium">Variant</th>
+                      <th className="px-5 py-3 font-medium">Stock</th>
+                      <th className="px-5 py-3 font-medium">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {lowStock.map((alert, i) => (
+                      <tr key={i} className="hover:bg-orange-50">
+                        <td className="px-5 py-3 font-medium text-[#0F1111] max-w-[200px] truncate">{alert.productName}</td>
+                        <td className="px-5 py-3 text-[#565959]">{alert.label || '—'}</td>
+                        <td className="px-5 py-3"><LowStockBadge stock={alert.stock} /></td>
+                        <td className="px-5 py-3">
+                          <Link
+                            to={`/seller/listings/${alert.productId}/edit`}
+                            className="text-[#007185] hover:text-[#C7511F] hover:underline text-[12px]"
+                          >
+                            Update stock
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
 
             <div className="bg-white border border-gray-200 rounded shadow-sm">
               <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">

@@ -10,6 +10,9 @@ const sellerRoutes = require('./seller.routes');
 const adminRoutes = require('./admin.routes');
 const uploadRoutes = require('./upload.routes');
 const reviewRoutes = require('./review.routes');
+const addressRoutes = require('./address.routes');
+const wishlistRoutes = require('./wishlist.routes');
+const storefrontController = require('../controllers/storefrontController');
 
 router.use('/auth', authRoutes);
 router.use('/products', productRoutes);
@@ -21,5 +24,10 @@ router.use('/seller', sellerRoutes);
 router.use('/admin', adminRoutes);
 router.use('/upload', uploadRoutes);
 router.use('/reviews', reviewRoutes);
+router.use('/addresses', addressRoutes);
+router.use('/wishlist', wishlistRoutes);
+
+// Public storefront
+router.get('/stores/:sellerId', storefrontController.getStorefront);
 
 module.exports = router;

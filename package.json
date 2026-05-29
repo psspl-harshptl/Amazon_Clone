@@ -7,6 +7,11 @@
     "doc": "docs"
   },
   "scripts": {
+    "dev": "concurrently -n \"backend,buyer,seller,admin\" -c \"yellow,blue,green,red\" --kill-others-on-fail \"npm run dev --prefix backend\" \"npm run dev:buyer --prefix frontend\" \"npm run dev:seller --prefix frontend\" \"npm run dev:admin --prefix frontend\"",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:buyer": "npm run dev:buyer --prefix frontend",
+    "dev:seller": "npm run dev:seller --prefix frontend",
+    "dev:admin": "npm run dev:admin --prefix frontend",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -22,6 +27,7 @@
   },
   "homepage": "https://github.com/psspl-harshptl/Amazon_Clone#readme",
   "devDependencies": {
-    "@playwright/test": "^1.60.0"
+    "@playwright/test": "^1.60.0",
+    "concurrently": "^9.2.1"
   }
 }
