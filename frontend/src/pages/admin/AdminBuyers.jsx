@@ -40,7 +40,7 @@ export default function AdminBuyers() {
               placeholder="Search name or email…"
               className="border border-gray-300 rounded px-3 py-1.5 text-[13px] focus:outline-none focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600] w-60"
             />
-            <button type="submit" className="bg-[#FF9900] hover:bg-[#e88b00] text-black text-[13px] font-medium px-4 py-1.5 rounded transition-colors">
+            <button type="submit" className="bg-[#FFD814] hover:bg-[#F7CA00] border border-[#FCD200] text-[#0F1111] text-[13px] font-medium px-4 py-1.5 rounded shadow-sm transition-colors">
               Search
             </button>
           </form>
@@ -65,7 +65,7 @@ export default function AdminBuyers() {
                   <th className="px-5 py-3 font-medium">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-50">
                 {buyers.map(b => (
                   <tr key={b.id} className="hover:bg-[#F7F8F8]">
                     <td className="px-5 py-3 font-medium text-[#0F1111]">{b.name}</td>
@@ -78,7 +78,7 @@ export default function AdminBuyers() {
                     <td className="px-5 py-3">
                       <button
                         onClick={() => navigate(`/admin/buyers/${b.id}`)}
-                        className="text-[#0066C0] hover:underline font-medium"
+                        className="text-[#007185] hover:text-[#C7511F] hover:underline font-medium"
                       >
                         View Details
                       </button>

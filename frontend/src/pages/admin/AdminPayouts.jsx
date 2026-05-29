@@ -56,7 +56,7 @@ export default function AdminPayouts() {
         <h1 className="text-[21px] font-bold text-[#0F1111]">Payout Requests ({payouts.length})</h1>
 
         {msg && (
-          <div className="p-3 bg-[#DFF2BF] border border-[#4F8A10] text-[#4F8A10] text-[13px] rounded">{msg}</div>
+          <div className="p-3 bg-[#DFF2BF] border border-[#4F8A10] text-[#4F8A10] text-[13px] rounded shadow-sm">{msg}</div>
         )}
 
         <div className="flex gap-0 border border-gray-300 rounded overflow-hidden w-fit bg-white shadow-sm">
@@ -88,7 +88,7 @@ export default function AdminPayouts() {
                   <th className="px-5 py-3 font-medium">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-50">
                 {payouts.map(p => (
                   <tr key={p.id} className="hover:bg-[#F7F8F8]">
                     <td className="px-5 py-3">
@@ -116,7 +116,7 @@ export default function AdminPayouts() {
                     <td className="px-5 py-3">
                       {p.status === 'pending' && (
                         <div className="flex gap-3">
-                          <button onClick={() => approve(p.id)} className="text-[#007600] hover:underline font-medium">Approve</button>
+                          <button onClick={() => approve(p.id)} className="text-[#007185] hover:text-[#C7511F] hover:underline font-medium">Approve</button>
                           <button onClick={() => setRejectModal(p)} className="text-[#CC0C39] hover:underline font-medium">Reject</button>
                         </div>
                       )}

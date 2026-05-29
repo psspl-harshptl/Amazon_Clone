@@ -69,7 +69,7 @@ export default function AdminDashboard() {
                       <th className="px-5 py-3 font-medium">Views</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-gray-50">
                     {(stats?.topViewed || []).map(p => (
                       <tr key={p.id} className="hover:bg-[#F7F8F8]">
                         <td className="px-5 py-3 font-medium text-[#0F1111]">{p.name}</td>

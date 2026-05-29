@@ -3,6 +3,7 @@ const router = express.Router();
 const authMiddleware = require('../middlewares/auth.middleware');
 const { requireRole } = require('../middlewares/role.middleware');
 const adminController = require('../controllers/adminController');
+const commissionController = require('../controllers/commissionController');
 
 router.use(authMiddleware, requireRole('super_admin'));
 
@@ -28,6 +29,12 @@ router.put('/sellers/:id/reject',                adminController.rejectSeller);
 router.get('/category-requests',                 adminController.getCategoryRequests);
 router.put('/category-requests/:id/approve',     adminController.approveCategoryRequest);
 router.put('/category-requests/:id/reject',      adminController.rejectCategoryRequest);
+
+// Commission tiers
+router.get('/commission-tiers',          commissionController.getAll);
+router.post('/commission-tiers',         commissionController.create);
+router.put('/commission-tiers/:id',      commissionController.update);
+router.delete('/commission-tiers/:id',   commissionController.remove);
 
 // Payout requests management
 router.get('/payouts',                           adminController.getAllPayoutRequests);

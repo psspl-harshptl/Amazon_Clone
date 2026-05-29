@@ -48,15 +48,17 @@ export default function AdminBuyerDetail() {
       <main className="flex-1 px-6 py-6 space-y-5 overflow-auto">
         <button
           onClick={() => navigate('/admin/buyers')}
-          className="text-[13px] text-[#0066C0] hover:underline"
+          className="text-[13px] text-[#007185] hover:text-[#C7511F] hover:underline"
         >
           ← Back to Buyers
         </button>
 
         {/* Profile */}
-        <section className="bg-white border border-gray-200 rounded shadow-sm p-5">
-          <h2 className="text-[16px] font-bold text-[#0F1111] mb-4">Buyer Profile</h2>
-          <div className="grid grid-cols-2 gap-4 text-[13px]">
+        <section className="bg-white border border-gray-200 rounded shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-100">
+            <h2 className="text-[15px] font-bold text-[#0F1111]">Buyer Profile</h2>
+          </div>
+          <div className="p-5 grid grid-cols-2 gap-4 text-[13px]">
             <Field label="Name" value={buyer.name} />
             <Field label="Email" value={buyer.email} />
             <Field label="Phone" value={buyer.phone || '—'} />
@@ -71,34 +73,36 @@ export default function AdminBuyerDetail() {
         </section>
 
         {/* Cart */}
-        <section className="bg-white border border-gray-200 rounded shadow-sm p-5">
-          <h2 className="text-[16px] font-bold text-[#0F1111] mb-4">
-            Current Cart ({cartItems.length} item{cartItems.length !== 1 ? 's' : ''})
-          </h2>
+        <section className="bg-white border border-gray-200 rounded shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-100">
+            <h2 className="text-[15px] font-bold text-[#0F1111]">
+              Current Cart ({cartItems.length} item{cartItems.length !== 1 ? 's' : ''})
+            </h2>
+          </div>
           {cartItems.length === 0 ? (
-            <p className="text-[13px] text-[#565959]">Cart is empty</p>
+            <p className="text-[13px] text-[#565959] px-5 py-8">Cart is empty</p>
           ) : (
             <table className="w-full text-[13px]">
               <thead className="bg-[#F7F8F8] border-b border-gray-200">
                 <tr className="text-left text-[11px] text-[#565959] uppercase">
-                  <th className="px-4 py-2 font-medium">Product</th>
-                  <th className="px-4 py-2 font-medium">Price</th>
-                  <th className="px-4 py-2 font-medium">Qty</th>
-                  <th className="px-4 py-2 font-medium">Subtotal</th>
+                  <th className="px-5 py-3 font-medium">Product</th>
+                  <th className="px-5 py-3 font-medium">Price</th>
+                  <th className="px-5 py-3 font-medium">Qty</th>
+                  <th className="px-5 py-3 font-medium">Subtotal</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-50">
                 {cartItems.map(item => (
-                  <tr key={item.id}>
-                    <td className="px-4 py-3 flex items-center gap-3">
+                  <tr key={item.id} className="hover:bg-[#F7F8F8]">
+                    <td className="px-5 py-3 flex items-center gap-3">
                       {item.product?.imageUrl && (
                         <img src={item.product.imageUrl} alt="" className="w-10 h-10 object-cover rounded border" />
                       )}
                       <span className="font-medium text-[#0F1111]">{item.product?.name || '—'}</span>
                     </td>
-                    <td className="px-4 py-3 text-[#565959]">{fmt(item.product?.price)}</td>
-                    <td className="px-4 py-3 text-[#565959]">{item.quantity}</td>
-                    <td className="px-4 py-3 text-[#0F1111] font-medium">{fmt((item.product?.price || 0) * item.quantity)}</td>
+                    <td className="px-5 py-3 text-[#565959]">{fmt(item.product?.price)}</td>
+                    <td className="px-5 py-3 text-[#565959]">{item.quantity}</td>
+                    <td className="px-5 py-3 font-medium text-[#0F1111]">{fmt((item.product?.price || 0) * item.quantity)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -107,14 +111,16 @@ export default function AdminBuyerDetail() {
         </section>
 
         {/* Orders */}
-        <section className="bg-white border border-gray-200 rounded shadow-sm p-5">
-          <h2 className="text-[16px] font-bold text-[#0F1111] mb-4">Order History ({orders.length})</h2>
+        <section className="bg-white border border-gray-200 rounded shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-100">
+            <h2 className="text-[15px] font-bold text-[#0F1111]">Order History ({orders.length})</h2>
+          </div>
           {orders.length === 0 ? (
-            <p className="text-[13px] text-[#565959]">No orders yet</p>
+            <p className="text-[13px] text-[#565959] px-5 py-8">No orders yet</p>
           ) : (
-            <div className="space-y-4">
+            <div className="divide-y divide-gray-50">
               {orders.map(order => (
-                <div key={order.id} className="border border-gray-200 rounded p-4">
+                <div key={order.id} className="p-5 hover:bg-[#F7F8F8]">
                   <div className="flex items-center justify-between mb-3">
                     <div>
                       <span className="text-[13px] font-semibold text-[#0F1111]">Order #{order.id}</span>
@@ -127,13 +133,11 @@ export default function AdminBuyerDetail() {
                       <span className="text-[13px] font-bold text-[#0F1111]">{fmt(order.totalAmount)}</span>
                     </div>
                   </div>
-
                   {order.shippingAddress && (
                     <p className="text-[12px] text-[#565959] mb-3">
                       Ship to: {[order.shippingAddress.fullName, order.shippingAddress.addressLine1, order.shippingAddress.city, order.shippingAddress.state].filter(Boolean).join(', ')}
                     </p>
                   )}
-
                   <div className="space-y-2">
                     {(order.items || []).map(item => (
                       <div key={item.id} className="flex items-center gap-3 text-[13px]">
@@ -142,7 +146,7 @@ export default function AdminBuyerDetail() {
                         )}
                         <span className="text-[#0F1111] flex-1">{item.product?.name || '—'}</span>
                         <span className="text-[#565959]">×{item.quantity}</span>
-                        <span className="text-[#0F1111] font-medium">{fmt(item.priceAtPurchase)}</span>
+                        <span className="font-medium text-[#0F1111]">{fmt(item.priceAtPurchase)}</span>
                       </div>
                     ))}
                   </div>

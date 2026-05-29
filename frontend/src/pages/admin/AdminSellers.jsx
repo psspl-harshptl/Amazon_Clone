@@ -50,7 +50,7 @@ export default function AdminSellers() {
         <h1 className="text-[21px] font-bold text-[#0F1111]">Sellers ({total})</h1>
 
         {msg && (
-          <div className="p-3 bg-[#DFF2BF] border border-[#4F8A10] text-[#4F8A10] text-[13px] rounded">{msg}</div>
+          <div className="p-3 bg-[#DFF2BF] border border-[#4F8A10] text-[#4F8A10] text-[13px] rounded shadow-sm">{msg}</div>
         )}
 
         <div className="flex gap-0 border border-gray-300 rounded overflow-hidden w-fit bg-white shadow-sm">
@@ -81,7 +81,7 @@ export default function AdminSellers() {
                   <th className="px-5 py-3 font-medium">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-50">
                 {sellers.map(s => (
                   <tr key={s.id} className="hover:bg-[#F7F8F8]">
                     <td className="px-5 py-3 font-medium text-[#0F1111]">{s.name}</td>
@@ -97,12 +97,12 @@ export default function AdminSellers() {
                     </td>
                     <td className="px-5 py-3">
                       <div className="flex gap-3">
-                        <button onClick={() => navigate(`/admin/sellers/${s.id}`)} className="text-[#0066C0] hover:underline font-medium">View</button>
+                        <button onClick={() => navigate(`/admin/sellers/${s.id}`)} className="text-[#007185] hover:text-[#C7511F] hover:underline font-medium">View</button>
                         {s.sellerStatus !== 'approved' && (
-                          <button onClick={() => approve(s.id)} className="text-[#007600] hover:underline font-medium">Approve</button>
+                          <button onClick={() => approve(s.id)} className="text-[#007185] hover:text-[#C7511F] hover:underline font-medium">Approve</button>
                         )}
                         {s.sellerStatus !== 'rejected' && (
-                          <button onClick={() => setRejectModal(s)} className="text-[#c45500] hover:underline font-medium">Reject</button>
+                          <button onClick={() => setRejectModal(s)} className="text-[#CC0C39] hover:underline font-medium">Reject</button>
                         )}
                       </div>
                     </td>

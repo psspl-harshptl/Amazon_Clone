@@ -26,6 +26,7 @@ import CreateListing from './pages/seller/CreateListing';
 import EditListing from './pages/seller/EditListing';
 import SellerOrders from './pages/seller/SellerOrders';
 import SellerFinancials from './pages/seller/SellerFinancials';
+import SellerCommissionRates from './pages/seller/SellerCommissionRates';
 import StorefrontSettings from './pages/seller/StorefrontSettings';
 import LinkBankAccount from './pages/seller/LinkBankAccount';
 
@@ -40,6 +41,7 @@ import AdminSellers from './pages/admin/AdminSellers';
 import AdminCategories from './pages/admin/AdminCategories';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminPayouts from './pages/admin/AdminPayouts';
+import AdminCommissionTiers from './pages/admin/AdminCommissionTiers';
 import AdminBuyers from './pages/admin/AdminBuyers';
 import AdminBuyerDetail from './pages/admin/AdminBuyerDetail';
 import AdminSellerDetail from './pages/admin/AdminSellerDetail';
@@ -141,6 +143,7 @@ function AppContent() {
           <Route path="/seller/listings/:id/edit" element={<SellerRoute><EditListing /></SellerRoute>} />
           <Route path="/seller/orders"        element={<SellerRoute><SellerOrders /></SellerRoute>} />
           <Route path="/seller/financials"    element={<SellerRoute><SellerFinancials /></SellerRoute>} />
+          <Route path="/seller/commission"    element={<SellerRoute><SellerCommissionRates /></SellerRoute>} />
           <Route path="/seller/storefront"    element={<SellerRoute bypassStorefrontCheck><StorefrontSettings /></SellerRoute>} />
           <Route path="/seller/bank-details"  element={<SellerRoute bypassBankCheck bypassStorefrontCheck><LinkBankAccount /></SellerRoute>} />
 
@@ -152,6 +155,7 @@ function AppContent() {
           <Route path="/admin/categories"     element={<AdminRoute><AdminCategories /></AdminRoute>} />
           <Route path="/admin/orders"         element={<AdminRoute><AdminOrders /></AdminRoute>} />
           <Route path="/admin/payouts"        element={<AdminRoute><AdminPayouts /></AdminRoute>} />
+          <Route path="/admin/commission"     element={<AdminRoute><AdminCommissionTiers /></AdminRoute>} />
           <Route path="/admin/buyers"         element={<AdminRoute><AdminBuyers /></AdminRoute>} />
           <Route path="/admin/buyers/:id"     element={<AdminRoute><AdminBuyerDetail /></AdminRoute>} />
           <Route path="/admin/sellers/:id"    element={<AdminRoute><AdminSellerDetail /></AdminRoute>} />

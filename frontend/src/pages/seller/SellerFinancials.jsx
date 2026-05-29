@@ -5,60 +5,126 @@ import { useAuth } from '../../context/AuthContext';
 
 const fmtINR = (n) => `₹${parseFloat(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 0 })}`;
 
+const fmtShort = (n) => {
+  if (n >= 100000) return `₹${(n / 100000).toFixed(1)}L`;
+  if (n >= 1000)   return `₹${(n / 1000).toFixed(0)}K`;
+  return `₹${n}`;
+};
+
+const CHART_H = 180;
+const BARS = [
+  { key: 'sales',   color: '#007600', label: 'Sales' },
+  { key: 'payouts', color: '#007185', label: 'Payouts' },
+  { key: 'net',     color: '#FF9900', label: 'Net',    net: true },
+];
+
 function BarChart({ monthlyFlow }) {
+  const [tooltip, setTooltip] = useState(null);
+
   if (!monthlyFlow?.length) return null;
 
-  const maxSales = Math.max(...monthlyFlow.map(m => m.sales), 1);
+  const allVals = monthlyFlow.flatMap(m => [m.sales, m.payouts, Math.max(0, m.net)]);
+  const rawMax  = Math.max(...allVals, 1);
+
+  // round up to a nice number for the Y-axis ceiling
+  const magnitude = Math.pow(10, Math.floor(Math.log10(rawMax)));
+  const yMax      = Math.ceil(rawMax / magnitude) * magnitude;
+
+  const STEPS    = 4;
+  const gridVals = Array.from({ length: STEPS + 1 }, (_, i) => (yMax / STEPS) * i);
+
+  const px = (v) => Math.round((Math.max(0, v) / yMax) * CHART_H);
 
   return (
-    <div className="overflow-x-auto">
-      <div className="flex items-end gap-3 min-w-[520px] h-44 px-2 pb-1">
-        {monthlyFlow.map(m => {
-          const salesPct   = Math.round((m.sales / maxSales) * 100);
-          const payoutsPct = Math.round((m.payouts / maxSales) * 100);
-          const netPct     = m.net > 0 ? Math.round((m.net / maxSales) * 100) : 0;
-          return (
-            <div key={m.key} className="flex-1 flex flex-col items-center gap-1 group relative">
-              {/* Tooltip */}
-              <div className="absolute bottom-full mb-2 hidden group-hover:flex flex-col bg-[#0F1111] text-white text-[11px] rounded p-2 shadow-lg z-10 whitespace-nowrap gap-0.5">
-                <span className="font-bold text-[12px] mb-1">{m.label}</span>
-                <span className="text-green-300">Sales: {fmtINR(m.sales)}</span>
-                <span className="text-orange-300">Commission: -{fmtINR(m.commissions)}</span>
-                <span className="text-red-300">Refunds: -{fmtINR(m.refunds)}</span>
-                <span className="text-blue-300">Payouts: -{fmtINR(m.payouts)}</span>
-                <span className="text-white border-t border-gray-600 pt-1 mt-0.5">Net: {fmtINR(m.net)}</span>
-              </div>
-              {/* Bars */}
-              <div className="w-full flex gap-0.5 items-end h-36">
+    <div className="select-none">
+      <div className="flex gap-3">
+        {/* Y-axis labels */}
+        <div className="flex flex-col-reverse justify-between pb-6 w-14 flex-shrink-0">
+          {gridVals.map(v => (
+            <span key={v} className="text-[10px] text-[#565959] text-right leading-none">{fmtShort(v)}</span>
+          ))}
+        </div>
+
+        {/* Chart body */}
+        <div className="flex-1 min-w-0">
+          {/* Plot area */}
+          <div className="relative" style={{ height: CHART_H }}>
+            {/* Gridlines */}
+            {gridVals.map(v => (
+              <div
+                key={v}
+                className="absolute left-0 right-0 border-t border-dashed border-gray-200"
+                style={{ bottom: `${(v / yMax) * 100}%` }}
+              />
+            ))}
+
+            {/* Bars */}
+            <div className="absolute inset-0 flex items-end gap-2 px-1">
+              {monthlyFlow.map((m) => (
                 <div
-                  className="flex-1 bg-[#007600] rounded-t transition-all"
-                  style={{ height: `${salesPct}%`, minHeight: m.sales > 0 ? 3 : 0 }}
-                  title={`Sales: ${fmtINR(m.sales)}`}
-                />
-                <div
-                  className="flex-1 bg-[#0066C0] rounded-t transition-all"
-                  style={{ height: `${payoutsPct}%`, minHeight: m.payouts > 0 ? 3 : 0 }}
-                  title={`Payouts: ${fmtINR(m.payouts)}`}
-                />
-                <div
-                  className="flex-1 bg-[#FF9900] rounded-t transition-all"
-                  style={{ height: `${netPct}%`, minHeight: m.net > 0 ? 3 : 0 }}
-                  title={`Net: ${fmtINR(m.net)}`}
-                />
-              </div>
-              <span className="text-[10px] text-[#565959] text-center leading-tight">{m.label}</span>
+                  key={m.key}
+                  className="flex-1 flex items-end gap-0.5 cursor-pointer"
+                  onMouseEnter={e => setTooltip({ key: m.key, m, rect: e.currentTarget.getBoundingClientRect() })}
+                  onMouseLeave={() => setTooltip(null)}
+                >
+                  {BARS.map(({ key, color, net }) => {
+                    const val    = net ? Math.max(0, m[key]) : m[key];
+                    const height = px(val);
+                    return (
+                      <div
+                        key={key}
+                        className="flex-1 rounded-t transition-all duration-200"
+                        style={{
+                          height:     height > 0 ? height : 2,
+                          background: color,
+                          opacity:    height > 0 ? 1 : 0.15,
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              ))}
             </div>
-          );
-        })}
+          </div>
+
+          {/* Month labels */}
+          <div className="flex gap-2 px-1 mt-2">
+            {monthlyFlow.map(m => (
+              <div key={m.key} className="flex-1 text-center">
+                <span className="text-[10px] text-[#565959] leading-none">{m.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-      <div className="flex gap-4 mt-2 px-2">
-        {[['#007600','Sales'],['#0066C0','Payouts'],['#FF9900','Net']].map(([c, l]) => (
-          <div key={l} className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm flex-shrink-0" style={{ background: c }} />
-            <span className="text-[11px] text-[#565959]">{l}</span>
+
+      {/* Legend */}
+      <div className="flex gap-5 mt-4 pl-[4.25rem]">
+        {BARS.map(({ color, label }) => (
+          <div key={label} className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-sm flex-shrink-0" style={{ background: color }} />
+            <span className="text-[11px] text-[#565959]">{label}</span>
           </div>
         ))}
       </div>
+
+      {/* Tooltip — rendered as fixed overlay */}
+      {tooltip && (
+        <div
+          className="fixed z-50 bg-[#0F1111] text-white text-[11px] rounded-lg p-3 shadow-xl pointer-events-none space-y-1 min-w-[160px]"
+          style={{ left: tooltip.rect.left + tooltip.rect.width / 2, top: tooltip.rect.top - 8, transform: 'translate(-50%, -100%)' }}
+        >
+          <p className="font-bold text-[12px] mb-1 border-b border-gray-700 pb-1">{tooltip.m.label}</p>
+          <p className="flex justify-between gap-4"><span className="text-green-300">Sales</span><span>{fmtINR(tooltip.m.sales)}</span></p>
+          <p className="flex justify-between gap-4"><span className="text-orange-300">Commission</span><span>-{fmtINR(tooltip.m.commissions)}</span></p>
+          <p className="flex justify-between gap-4"><span className="text-red-300">Refunds</span><span>-{fmtINR(tooltip.m.refunds)}</span></p>
+          <p className="flex justify-between gap-4"><span className="text-blue-300">Payouts</span><span>-{fmtINR(tooltip.m.payouts)}</span></p>
+          <p className="flex justify-between gap-4 border-t border-gray-700 pt-1 mt-1">
+            <span className="text-white font-semibold">Net</span>
+            <span className={tooltip.m.net >= 0 ? 'text-green-300' : 'text-red-300'}>{fmtINR(tooltip.m.net)}</span>
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -131,8 +197,11 @@ export default function SellerFinancials() {
         <h1 className="text-[21px] font-bold text-[#0F1111]">Payments & Financial Ledger</h1>
 
         {/* ── Analytics ──────────────────────────────────────────── */}
-        <section className="bg-white border border-gray-200 rounded shadow-sm p-5 space-y-5">
-          <h2 className="text-[16px] font-bold text-[#0F1111]">Cash Flow Analytics</h2>
+        <section className="bg-white border border-gray-200 rounded shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-100">
+            <h2 className="text-[15px] font-bold text-[#0F1111]">Cash Flow Analytics</h2>
+          </div>
+          <div className="p-5 space-y-6">
 
           {analyticsLoading ? (
             <div className="flex justify-center items-center h-28">
@@ -158,7 +227,7 @@ export default function SellerFinancials() {
 
               {/* Monthly bar chart */}
               <div>
-                <p className="text-[12px] font-semibold text-[#0F1111] mb-3">Monthly Cash Flow (last 6 months)</p>
+                <p className="text-[12px] font-semibold text-[#565959] uppercase tracking-wide mb-4">Monthly Cash Flow — last 6 months</p>
                 <BarChart monthlyFlow={analytics.monthlyFlow} />
               </div>
 
@@ -176,7 +245,7 @@ export default function SellerFinancials() {
                         <th className="px-4 py-2 font-medium text-right">Net</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-gray-50">
                       {[...analytics.monthlyFlow].reverse().map(m => (
                         <tr key={m.key} className="hover:bg-[#F7F8F8]">
                           <td className="px-4 py-2 font-medium text-[#0F1111]">{m.label}</td>
@@ -197,6 +266,7 @@ export default function SellerFinancials() {
           ) : (
             <p className="text-[13px] text-[#565959]">No analytics data available yet.</p>
           )}
+          </div>
         </section>
 
         {loading ? (
@@ -303,6 +373,7 @@ export default function SellerFinancials() {
                           <th className="px-5 py-3 font-medium">Date</th>
                           <th className="px-5 py-3 font-medium">Type</th>
                           <th className="px-5 py-3 font-medium">Reference Item</th>
+                          <th className="px-5 py-3 font-medium">Rate</th>
                           <th className="px-5 py-3 font-medium">Amount</th>
                         </tr>
                       </thead>
@@ -325,6 +396,13 @@ export default function SellerFinancials() {
                               </td>
                               <td className="px-5 py-3 text-[#565959]">
                                 {log.orderItemId ? `Order Item #${log.orderItemId}` : '—'}
+                              </td>
+                              <td className="px-5 py-3 text-[#565959]">
+                                {log.rateApplied != null
+                                  ? <span className="bg-[#FFF3CD] text-[#856404] text-[11px] font-semibold px-1.5 py-0.5 rounded">
+                                      {(parseFloat(log.rateApplied) * 100).toFixed(1)}%
+                                    </span>
+                                  : '—'}
                               </td>
                               <td className={`px-5 py-3 font-bold ${isNegative ? 'text-[#B12704]' : 'text-[#007600]'}`}>
                                 {isNegative ? '-' : '+'}₹{Math.abs(parseFloat(log.amount)).toLocaleString('en-IN')}

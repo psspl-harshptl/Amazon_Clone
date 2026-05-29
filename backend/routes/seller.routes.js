@@ -6,6 +6,7 @@ const sellerController = require('../controllers/sellerController');
 const variantController = require('../controllers/variantController');
 const sellerOrderController = require('../controllers/sellerOrderController');
 const sellerFinancialController = require('../controllers/sellerFinancialController');
+const commissionController = require('../controllers/commissionController');
 const storefrontController = require('../controllers/storefrontController');
 const multer = require('multer');
 
@@ -29,6 +30,8 @@ router.put('/orders/items/:itemId/fulfillment', sellerOrderController.updateFulf
 router.get('/orders/items/:itemId/packingslip', sellerOrderController.printPackingSlip);
 
 // Financials & Payouts
+router.get('/commission-tiers', commissionController.getTiersForSeller);
+
 router.get('/financials', sellerFinancialController.getFinancialOverview);
 router.get('/financials/analytics', sellerFinancialController.getAnalytics);
 router.post('/financials/payouts', sellerFinancialController.requestPayout);
