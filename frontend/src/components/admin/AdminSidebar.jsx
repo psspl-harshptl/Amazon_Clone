@@ -6,7 +6,9 @@ const NAV = [
   { to: '/admin/orders',      label: 'Orders',      icon: '🚚' },
   { to: '/admin/products',    label: 'Products',    icon: '📦' },
   { to: '/admin/sellers',     label: 'Sellers',     icon: '🏪' },
+  { to: '/admin/buyers',      label: 'Buyers',      icon: '👤' },
   { to: '/admin/categories',  label: 'Categories',  icon: '🏷' },
+  { to: '/admin/payouts',     label: 'Payout Requests', icon: '💰' },
 ];
 
 export default function AdminSidebar() {

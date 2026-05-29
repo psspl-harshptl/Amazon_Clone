@@ -1,27 +1,24 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import StatusBadge from '../../components/common/StatusBadge';
 
 const TABS = ['all', 'pending', 'approved', 'rejected'];
 
-export default function AdminSellers() {
-  const [sellers, setSellers] = useState([]);
-  const [total, setTotal] = useState(0);
+export default function AdminPayouts() {
+  const [payouts, setPayouts] = useState([]);
   const [tab, setTab] = useState('pending');
   const [loading, setLoading] = useState(true);
   const [rejectModal, setRejectModal] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
   const [msg, setMsg] = useState('');
-  const navigate = useNavigate();
 
   const load = (statusFilter = tab) => {
     setLoading(true);
-    const params = new URLSearchParams({ limit: 50 });
-    if (statusFilter !== 'all') params.set('sellerStatus', statusFilter);
-    api.get(`/admin/sellers?${params}`)
-      .then(r => { setSellers(r.data.data.rows || []); setTotal(r.data.data.count || 0); })
+    const params = new URLSearchParams();
+    if (statusFilter !== 'all') params.set('status', statusFilter);
+    api.get(`/admin/payouts?${params}`)
+      .then(r => { setPayouts(r.data.data || []); })
       .catch(console.error)
       .finally(() => setLoading(false));
   };
@@ -31,23 +28,32 @@ export default function AdminSellers() {
   const flash = (m) => { setMsg(m); setTimeout(() => setMsg(''), 3000); };
 
   const approve = async (id) => {
-    await api.put(`/admin/sellers/${id}/approve`);
-    flash('Seller approved — they can now log in and list products');
-    load();
+    try {
+      await api.put(`/admin/payouts/${id}/approve`);
+      flash('Payout approved and seller balance deducted');
+      load();
+    } catch (error) {
+      alert(error.response?.data?.message || 'Approval failed');
+    }
   };
 
   const submitReject = async () => {
-    await api.put(`/admin/sellers/${rejectModal.id}/reject`, { reason: rejectReason });
-    setRejectModal(null);
-    flash('Seller rejected');
-    load();
+    try {
+      await api.put(`/admin/payouts/${rejectModal.id}/reject`, { reason: rejectReason });
+      setRejectModal(null);
+      setRejectReason('');
+      flash('Payout request rejected');
+      load();
+    } catch (error) {
+      alert(error.response?.data?.message || 'Rejection failed');
+    }
   };
 
   return (
     <div className="flex min-h-screen bg-[#EAEDED]">
       <AdminSidebar />
       <main className="flex-1 px-6 py-6 space-y-4 overflow-auto">
-        <h1 className="text-[21px] font-bold text-[#0F1111]">Sellers ({total})</h1>
+        <h1 className="text-[21px] font-bold text-[#0F1111]">Payout Requests ({payouts.length})</h1>
 
         {msg && (
           <div className="p-3 bg-[#DFF2BF] border border-[#4F8A10] text-[#4F8A10] text-[13px] rounded">{msg}</div>
@@ -68,43 +74,52 @@ export default function AdminSellers() {
             <div className="flex justify-center items-center h-40">
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-[#FF9900]" />
             </div>
-          ) : sellers.length === 0 ? (
-            <p className="text-center text-[#565959] py-16 text-[14px]">No sellers found</p>
+          ) : payouts.length === 0 ? (
+            <p className="text-center text-[#565959] py-16 text-[14px]">No payout requests found</p>
           ) : (
             <table className="w-full text-[13px]">
               <thead className="bg-[#F7F8F8] border-b border-gray-200">
                 <tr className="text-left text-[11px] text-[#565959] uppercase">
-                  <th className="px-5 py-3 font-medium">Seller</th>
-                  <th className="px-5 py-3 font-medium">Email</th>
-                  <th className="px-5 py-3 font-medium">Joined</th>
+                  <th className="px-5 py-3 font-medium">Seller / Store</th>
+                  <th className="px-5 py-3 font-medium">Amount</th>
+                  <th className="px-5 py-3 font-medium">Bank Details</th>
+                  <th className="px-5 py-3 font-medium">Requested Date</th>
                   <th className="px-5 py-3 font-medium">Status</th>
                   <th className="px-5 py-3 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {sellers.map(s => (
-                  <tr key={s.id} className="hover:bg-[#F7F8F8]">
-                    <td className="px-5 py-3 font-medium text-[#0F1111]">{s.name}</td>
-                    <td className="px-5 py-3 text-[#565959]">{s.email}</td>
+                {payouts.map(p => (
+                  <tr key={p.id} className="hover:bg-[#F7F8F8]">
+                    <td className="px-5 py-3">
+                      <div className="font-semibold text-[#0F1111]">{p.seller?.storeName || 'Custom Store'}</div>
+                      <div className="text-[11px] text-[#565959]">{p.seller?.name} ({p.seller?.email})</div>
+                    </td>
+                    <td className="px-5 py-3 font-bold text-gray-900">₹{parseFloat(p.amount).toLocaleString('en-IN')}</td>
                     <td className="px-5 py-3 text-[#565959]">
-                      {new Date(s.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      <div className="text-[12px]"><strong>Bank:</strong> {p.bankDetails?.bankName}</div>
+                      <div className="text-[12px]"><strong>Acc #:</strong> {p.bankDetails?.accountNumber}</div>
+                      {p.bankDetails?.ifsc && <div className="text-[11px]"><strong>IFSC:</strong> {p.bankDetails?.ifsc}</div>}
+                      {p.bankDetails?.accountHolderName && <div className="text-[11px]"><strong>Holder:</strong> {p.bankDetails?.accountHolderName}</div>}
+                    </td>
+                    <td className="px-5 py-3 text-[#565959]">
+                      {new Date(p.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </td>
                     <td className="px-5 py-3">
-                      <StatusBadge status={s.sellerStatus} />
-                      {s.sellerRejectionReason && (
-                        <p className="text-[11px] text-[#CC0C39] mt-1 max-w-[150px] truncate">{s.sellerRejectionReason}</p>
+                      <StatusBadge status={p.status} />
+                      {p.rejectionReason && (
+                        <p className="text-[11px] text-[#CC0C39] mt-1 max-w-[180px] truncate" title={p.rejectionReason}>
+                          Reason: {p.rejectionReason}
+                        </p>
                       )}
                     </td>
                     <td className="px-5 py-3">
-                      <div className="flex gap-3">
-                        <button onClick={() => navigate(`/admin/sellers/${s.id}`)} className="text-[#0066C0] hover:underline font-medium">View</button>
-                        {s.sellerStatus !== 'approved' && (
-                          <button onClick={() => approve(s.id)} className="text-[#007600] hover:underline font-medium">Approve</button>
-                        )}
-                        {s.sellerStatus !== 'rejected' && (
-                          <button onClick={() => setRejectModal(s)} className="text-[#c45500] hover:underline font-medium">Reject</button>
-                        )}
-                      </div>
+                      {p.status === 'pending' && (
+                        <div className="flex gap-3">
+                          <button onClick={() => approve(p.id)} className="text-[#007600] hover:underline font-medium">Approve</button>
+                          <button onClick={() => setRejectModal(p)} className="text-[#CC0C39] hover:underline font-medium">Reject</button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -117,11 +132,11 @@ export default function AdminSellers() {
       {rejectModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
           <div className="bg-white border border-gray-300 rounded shadow-xl p-6 w-full max-w-md">
-            <h3 className="text-[16px] font-bold text-[#0F1111] mb-1">Reject Seller</h3>
-            <p className="text-[13px] text-[#565959] mb-4">{rejectModal.name} ({rejectModal.email})</p>
+            <h3 className="text-[16px] font-bold text-[#0F1111] mb-1">Reject Payout Request</h3>
+            <p className="text-[13px] text-[#565959] mb-4">Store: {rejectModal.seller?.storeName || rejectModal.seller?.name} (₹{parseFloat(rejectModal.amount).toLocaleString('en-IN')})</p>
             <textarea
               value={rejectReason} onChange={e => setRejectReason(e.target.value)}
-              rows={3} placeholder="Reason (optional — shown to seller)…"
+              rows={3} placeholder="Reason for rejection…"
               className="w-full border border-gray-400 rounded px-3 py-2 text-[13px] focus:outline-none focus:border-[#e77600] focus:ring-1 focus:ring-[#e77600] resize-none"
             />
             <div className="flex gap-3 mt-4 justify-end">
@@ -129,7 +144,7 @@ export default function AdminSellers() {
               <button
                 onClick={submitReject}
                 className="bg-[#CC0C39] hover:bg-[#b00a30] text-white text-[13px] font-medium px-4 py-1.5 rounded transition-colors"
-              >Reject Seller</button>
+              >Reject Payout</button>
             </div>
           </div>
         </div>

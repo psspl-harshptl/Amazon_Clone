@@ -1,4 +1,4 @@
-const { Product, User, Category, CategoryRequest, Order, OrderItem, Sequelize } = require('../models');
+const { Product, User, Category, CategoryRequest, Order, OrderItem, ProductVariant, PayoutRequest, SellerLedger, Cart, CartItem, sequelize, Sequelize } = require('../models');
 const { Op } = require('sequelize');
 
 class AdminService {
@@ -73,13 +73,105 @@ class AdminService {
     });
     if (!seller) throw new Error('Seller not found');
 
-    const products = await Product.findAll({
-      where: { sellerId },
-      include: [{ model: Category, as: 'category' }],
+    const [products, ledgerBalance, payoutRequests, orderStats] = await Promise.all([
+      Product.findAll({
+        where: { sellerId },
+        include: [{ model: Category, as: 'category' }],
+        order: [['createdAt', 'DESC']]
+      }),
+      SellerLedger.sum('amount', { where: { sellerId, status: 'cleared' } }),
+      PayoutRequest.findAll({
+        where: { sellerId },
+        order: [['createdAt', 'DESC']],
+        limit: 10
+      }),
+      OrderItem.findAll({
+        attributes: [
+          [sequelize.fn('COUNT', sequelize.col('OrderItem.id')), 'totalItems'],
+          [sequelize.fn('SUM', sequelize.col('OrderItem.priceAtPurchase')), 'totalRevenue'],
+        ],
+        include: [{
+          model: Product,
+          as: 'product',
+          attributes: [],
+          where: { sellerId },
+          required: true
+        }],
+        raw: true
+      })
+    ]);
+
+    return {
+      seller,
+      products,
+      payoutRequests,
+      clearedBalance: parseFloat(ledgerBalance || 0),
+      orderStats: orderStats[0] || { totalItems: 0, totalRevenue: 0 }
+    };
+  }
+
+  // ── Buyers ────────────────────────────────────────────────────────────────
+
+  async getAllBuyers(query = {}) {
+    const { page = 1, limit = 20, search } = query;
+    const where = { role: 'buyer' };
+    if (search) {
+      where[Op.or] = [
+        { name: { [Op.iLike]: `%${search}%` } },
+        { email: { [Op.iLike]: `%${search}%` } }
+      ];
+    }
+
+    const buyers = await User.findAndCountAll({
+      where,
+      attributes: { exclude: ['password'] },
+      limit: parseInt(limit),
+      offset: (page - 1) * limit,
       order: [['createdAt', 'DESC']]
     });
 
-    return { seller, products };
+    // attach order counts
+    const ids = buyers.rows.map(b => b.id);
+    const counts = await Order.findAll({
+      attributes: ['userId', [sequelize.fn('COUNT', sequelize.col('id')), 'orderCount']],
+      where: { userId: ids },
+      group: ['userId'],
+      raw: true
+    });
+    const countMap = Object.fromEntries(counts.map(c => [c.userId, parseInt(c.orderCount)]));
+    const rows = buyers.rows.map(b => ({ ...b.toJSON(), orderCount: countMap[b.id] || 0 }));
+
+    return { count: buyers.count, rows };
+  }
+
+  async getBuyerById(buyerId) {
+    const buyer = await User.findOne({
+      where: { id: buyerId, role: 'buyer' },
+      attributes: { exclude: ['password'] }
+    });
+    if (!buyer) throw new Error('Buyer not found');
+
+    const [orders, cart] = await Promise.all([
+      Order.findAll({
+        where: { userId: buyerId },
+        include: [{
+          model: OrderItem,
+          as: 'items',
+          include: [{ model: Product, as: 'product', attributes: ['id', 'name', 'imageUrl', 'price'] }]
+        }],
+        order: [['createdAt', 'DESC']]
+      }),
+      Cart.findOne({
+        where: { userId: buyerId },
+        include: [{
+          model: CartItem,
+          as: 'items',
+          include: [{ model: Product, as: 'product', attributes: ['id', 'name', 'imageUrl', 'price'] }]
+        }]
+      })
+    ]);
+
+    return { buyer, orders, cart };
   }
 
   async approveSeller(sellerId) {
@@ -149,12 +241,59 @@ class AdminService {
   }
 
   async updateOrderStatus(orderId, status) {
-    const allowed = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
+    const allowed = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'return_pending', 'returned'];
     if (!allowed.includes(status)) throw new Error('Invalid status value');
-    const order = await Order.findByPk(orderId);
-    if (!order) throw new Error('Order not found');
-    await order.update({ status });
-    return order;
+    
+    const t = await sequelize.transaction();
+    try {
+      const order = await Order.findByPk(orderId, {
+        transaction: t,
+        lock: t.LOCK.UPDATE
+      });
+      if (!order) throw new Error('Order not found');
+
+      const items = await OrderItem.findAll({
+        where: { orderId: order.id },
+        transaction: t
+      });
+
+      const oldStatus = order.status;
+
+      // Restore stock if transitioning to cancelled or returned from a non-restored state
+      const isRestoring = (status === 'cancelled' || status === 'returned');
+      const wasRestored = (oldStatus === 'cancelled' || oldStatus === 'returned');
+
+      if (isRestoring && !wasRestored) {
+        for (const item of items) {
+          if (item.variantId) {
+            const variant = await ProductVariant.findOne({
+              where: { id: item.variantId, productId: item.productId },
+              transaction: t,
+              lock: t.LOCK.UPDATE
+            });
+            if (variant) {
+              await variant.increment('stock', { by: item.quantity, transaction: t });
+            }
+          } else {
+            const product = await Product.findOne({
+              where: { id: item.productId },
+              transaction: t,
+              lock: t.LOCK.UPDATE
+            });
+            if (product && product.stock !== null) {
+              await product.increment('stock', { by: item.quantity, transaction: t });
+            }
+          }
+        }
+      }
+
+      await order.update({ status }, { transaction: t });
+      await t.commit();
+      return order;
+    } catch (error) {
+      await t.rollback();
+      throw error;
+    }
   }
 
   // ── Dashboard ─────────────────────────────────────────────────────────────
@@ -185,6 +324,101 @@ class AdminService {
       sellers: { total: totalSellers, pending: pendingSellers, approved: approvedSellers, rejected: rejectedSellers },
       topViewed,
     };
+  }
+
+  // ── Payout Requests ───────────────────────────────────────────────────────
+
+  async getAllPayoutRequests(query = {}) {
+    const { status } = query;
+    const where = {};
+    if (status) where.status = status;
+
+    return await PayoutRequest.findAll({
+      where,
+      include: [
+        {
+          model: User,
+          as: 'seller',
+          attributes: ['id', 'name', 'email', 'storeName']
+        }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+  }
+
+  async approvePayoutRequest(payoutId) {
+    const t = await sequelize.transaction();
+    try {
+      const payout = await PayoutRequest.findByPk(payoutId, {
+        transaction: t,
+        lock: t.LOCK.UPDATE
+      });
+
+      if (!payout) {
+        throw new Error('Payout request not found');
+      }
+
+      if (payout.status !== 'pending') {
+        throw new Error('Payout request has already been processed');
+      }
+
+      // Check current cleared ledger balance
+      const clearedResult = await SellerLedger.sum('amount', {
+        where: { sellerId: payout.sellerId, status: 'cleared' },
+        transaction: t
+      });
+      const clearedBalance = parseFloat(clearedResult || 0);
+
+      // Verify they have enough balance (payout was already requested, but let's do a final check)
+      if (parseFloat(payout.amount) > clearedBalance) {
+        throw new Error('Seller does not have sufficient cleared balance to cover this payout');
+      }
+
+      // Create negative ledger entry to deduct the amount
+      await SellerLedger.create({
+        sellerId: payout.sellerId,
+        amount: -parseFloat(payout.amount),
+        type: 'payout',
+        status: 'cleared'
+      }, { transaction: t });
+
+      await payout.update({ status: 'approved' }, { transaction: t });
+
+      await t.commit();
+      return payout;
+    } catch (error) {
+      await t.rollback();
+      throw error;
+    }
+  }
+
+  async rejectPayoutRequest(payoutId, reason) {
+    const t = await sequelize.transaction();
+    try {
+      const payout = await PayoutRequest.findByPk(payoutId, {
+        transaction: t,
+        lock: t.LOCK.UPDATE
+      });
+
+      if (!payout) {
+        throw new Error('Payout request not found');
+      }
+
+      if (payout.status !== 'pending') {
+        throw new Error('Payout request has already been processed');
+      }
+
+      await payout.update({
+        status: 'rejected',
+        rejectionReason: reason || 'Rejected by Administrator'
+      }, { transaction: t });
+
+      await t.commit();
+      return payout;
+    } catch (error) {
+      await t.rollback();
+      throw error;
+    }
   }
 }
 

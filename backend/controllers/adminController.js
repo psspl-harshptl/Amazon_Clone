@@ -93,6 +93,25 @@ class AdminController {
     }
   }
 
+  // Buyers
+  async getAllBuyers(req, res) {
+    try {
+      const data = await AdminService.getAllBuyers(req.query);
+      res.json({ success: true, data });
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async getBuyerById(req, res) {
+    try {
+      const data = await AdminService.getBuyerById(req.params.id);
+      res.json({ success: true, data });
+    } catch (error) {
+      res.status(404).json({ success: false, message: error.message });
+    }
+  }
+
   // Orders
   async getAllOrders(req, res) {
     try {
@@ -134,6 +153,34 @@ class AdminController {
     try {
       const data = await AdminService.rejectCategoryRequest(req.params.id, req.body.reason);
       res.json({ success: true, data, message: 'Category request rejected' });
+    } catch (error) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
+
+  // Payout Requests
+  async getAllPayoutRequests(req, res) {
+    try {
+      const data = await AdminService.getAllPayoutRequests(req.query);
+      res.json({ success: true, data });
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async approvePayoutRequest(req, res) {
+    try {
+      const payout = await AdminService.approvePayoutRequest(req.params.id);
+      res.json({ success: true, data: payout, message: 'Payout request approved and ledger debited' });
+    } catch (error) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
+
+  async rejectPayoutRequest(req, res) {
+    try {
+      const payout = await AdminService.rejectPayoutRequest(req.params.id, req.body.reason);
+      res.json({ success: true, data: payout, message: 'Payout request rejected' });
     } catch (error) {
       res.status(400).json({ success: false, message: error.message });
     }
